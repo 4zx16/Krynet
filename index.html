@@ -1,145 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Krynet | AI Communication Platform</title>
-     <meta name ="description" content="Why are u here. It's just features? You're a strange one. 😂">
-    <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Krynet Dev Test Page</title>
+    <meta name ="description" content="Why are u here. It's just features? You're a strange one. 😂">
+  <style>
+    body {
+      background: #0e0e10;
+      color: #f2f2f2;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 1rem;
+    }
+    .card {
+      background: #1a1a1a;
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid #0ff;
+    }
+    h2 {
+      margin-top: 0;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      background: #0ff;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0cf;
+    }
+    pre {
+      background: #121214;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    embed {
+      width: 100%;
+      max-height: 300px;
+      border-radius: 6px;
+      margin-top: 1rem;
+    }
+  </style>
 </head>
 <body>
-    <button><a href="Site.html">🤫</a></button>
-    <header class="site-header">
-        <div class="container">
-            <h1 class="logo">Krynet</h1>
-            <nav>
-                <ul>
-                    <li><a href="#intro">Intro</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#spotify">Spotify</a></li>
-                    <li><a href="#antivirus">Scan</a></li>
-                    <li><a href="#upscaling">Upscaling</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
 
-    <main class="container">
-        <section id="intro" class="card">
-            <h2>Welcome to Krynet</h2>
-            <p>The future of communication. Fast, secure, AI-moderated, and free from bloat.</p>
-        </section>
+<!-- INTRO -->
+<div class="card" id="intro">
+  <h2>⚙️ Krynet Dev Test Page</h2>
+  <p>Testing API functionality before production launch. This page will be deleted.</p>
+</div>
 
-        <section id="features" class="card">
-            <h2>Features</h2>
-            <ul class="features-list">
-                <li>⚡ Instant Communication</li>
-                <li>🤖 AI Moderation Engine</li>
-                <li>🛡️ Built-in Antivirus Scanner</li>
-                <li>🎧 Spotify Integration (Music Support Only)</li>
-                <li>🎮 Steam Store Integration</li>
-                <li>🔒 HEIF, HE-AAC, AVIF Only</li>
-                <li>📁 Media Embeds with AVIF/HEIF/HE-AAC</li>
-                <li>📡 100% API-Driven Infrastructure</li>
-                <li>📺 AI-Based Video Upscaling (GPU-aware)</li>
-                <li>🧠 All uploads are AI-scanned, format-verified, and deleted if malicious</li>
-            </ul>
-        </section>
+<div class="card" id="krynetApi">
+  <h2>🧪 Krynet API Tester</h2>
 
-        <section id="spotify" class="card">
-            <h2>Spotify Now Playing</h2>
-            <button id="loginSpotify">Login with Spotify</button>
-            <div id="nowPlaying" class="now-playing">Not connected to Spotify.</div>
-        </section>
+  <label for="apiEndpoint">Endpoint:</label>
+  <select id="apiEndpoint">
+    <option value="/accounts">POST /accounts (create_account)</option>
+    <option value="/accounts/login">POST /accounts/login</option>
+    <option value="/accounts/me">GET /accounts/me</option>
+    <option value="/messages/send">POST /messages/send</option>
+    <option value="/subscriptions/plans">GET /subscriptions/plans</option>
+    <option value="/stream/status/test123">GET /stream/status/{stream_id}</option>
+    <!-- Add more if needed -->
+  </select>
 
-        <section id="antivirus" class="card">
-            <h2>Upload File for Virus Scan</h2>
-            <form id="uploadForm">
-                <input type="file" id="fileInput" required />
-                <button type="submit">Upload & Scan</button>
-            </form>
-            <pre id="uploadResult"></pre>
-        </section>
+  <br><br>
 
-        <section id="upscaling" class="card">
-            <h2>Video Upscaling</h2>
-            <p>GPU Detected: <span id="gpuVendor">Detecting...</span></p>
-            <p><strong>Note:</strong> AI video enhancement only works with NVIDIA, AMD, or Intel GPUs.</p>
-        </section>
-    </main>
-<!-- Basic embed container -->
-<div class="embed-content">
-  <!-- Assume this gets injected dynamically -->
+  <label for="authToken">Bearer Token:</label><br>
+  <input type="text" id="authToken" placeholder="Paste token..." style="width: 100%;" />
+
+  <br><br>
+
+  <label for="requestBody">JSON Body:</label><br>
+  <textarea id="requestBody" rows="8" placeholder="{ }" style="width: 100%;"></textarea>
+
+  <br><br>
+
+  <button onclick="sendApiRequest()">Send Request</button>
+
+  <h3>Response:</h3>
+  <pre id="apiResponse">Waiting...</pre>
+</div>
+
+<script>
+  async function sendApiRequest() {
+    const endpoint = document.getElementById('apiEndpoint').value;
+    const token = document.getElementById('authToken').value.trim();
+    const bodyText = document.getElementById('requestBody').value.trim();
+    const fullUrl = `https://krynet.ai/api${endpoint}`;
+    const responseBox = document.getElementById('apiResponse');
+
+    const isGet = endpoint.includes('GET') || endpoint.startsWith('/accounts/me') || endpoint.includes('/plans') || endpoint.includes('/status');
+
+    try {
+      const res = await fetch(fullUrl, {
+        method: isGet ? 'GET' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        ...(isGet ? {} : { body: bodyText || '{}' })
+      });
+
+      const data = await res.json();
+      responseBox.textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+      responseBox.textContent = '❌ Error: ' + err.message;
+    }
+  }
+</script>
+  
+<!-- SPOTIFY TEST -->
+<div class="card" id="spotify">
+  <h2>🎧 Spotify Auth</h2>
+  <button id="loginSpotify">Login with Spotify</button>
+  <div id="nowPlaying">Not connected.</div>
+</div>
+
+<!-- FILE SCAN -->
+<div class="card" id="antivirus">
+  <h2>🛡️ Virus Scan Test</h2>
+  <form id="uploadForm">
+    <input type="file" id="fileInput" required />
+    <button type="submit">Upload & Scan</button>
+  </form>
+  <pre id="uploadResult">Awaiting scan...</pre>
+</div>
+
+<!-- GPU DETECTION -->
+<div class="card" id="upscaling">
+  <h2>📺 GPU Detection</h2>
+  <p>Detected: <span id="gpuVendor">Detecting...</span></p>
+</div>
+
+<!-- MEDIA TEST -->
+<div class="card">
+  <h2>📁 AVIF Embed Test</h2>
   <embed src="/media/uploads/sample.avif" type="image/avif" />
 </div>
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 Krynet. Powered by APIs. Inspired by progress.</p>
-        </div>
-    </footer>
-    <script>
-        // Spotify Auth
-        const clientId = '';
-        const redirectUri = window.location.origin;
-        const scopes = 'user-read-playback-state user-read-currently-playing';
 
-        // Login button event listener
-        document.getElementById('loginSpotify').addEventListener('click', () => {
-            const authUrl = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`;
-            window.location = authUrl;
-        });
+<script>
+  const clientId = ''; // Insert Spotify Client ID here
+  const redirectUri = window.location.origin;
+  const scopes = 'user-read-playback-state user-read-currently-playing';
 
-        // On page load, check for token in URL
-        window.addEventListener('load', () => {
-            const hash = window.location.hash.substring(1);
-            const hashParams = {};
-            hash.split('&').forEach(param => {
-                const [key, value] = param.split('=');
-                if (key && value) hashParams[key] = decodeURIComponent(value);
-            });
+  // Spotify Auth
+  document.getElementById('loginSpotify').addEventListener('click', () => {
+    const authUrl = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`;
+    window.location = authUrl;
+  });
 
-            const accessToken = hashParams['access_token'];
+  // On load: Parse token + detect GPU
+  window.addEventListener('load', () => {
+    const hash = window.location.hash.substring(1);
+    const params = Object.fromEntries(new URLSearchParams(hash));
+    if (params.access_token) fetchSpotifyData(params.access_token);
 
-            if (accessToken) {
-                // Set up Spotify player info with the access token
-                fetchSpotifyData(accessToken);
-            }
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    const info = gl?.getExtension('WEBGL_debug_renderer_info');
+    const vendor = info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : 'Unavailable';
+    const label = /NVIDIA/i.test(vendor) ? 'NVIDIA' : /AMD|Radeon/i.test(vendor) ? 'AMD' : /Intel/i.test(vendor) ? 'Intel' : 'Other';
+    document.getElementById('gpuVendor').textContent = vendor || label;
+  });
 
-            // GPU Detection
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            const debugInfo = gl?.getExtension('WEBGL_debug_renderer_info');
-            const vendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'Unavailable';
-            const gpuVendor = /NVIDIA/i.test(vendor) ? 'NVIDIA' : /AMD|Radeon/i.test(vendor) ? 'AMD' : /Intel/i.test(vendor) ? 'Intel' : 'Other';
-            document.getElementById('gpuVendor').textContent = vendor || gpuVendor;
-        });
-
-        // Fetch currently playing track from Spotify API
-        async function fetchSpotifyData(accessToken) {
-            try {
-                const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-                const data = await response.json();
-                const nowPlaying = document.getElementById('nowPlaying');
-                
-                if (data?.item) {
-                    const trackName = data.item.name;
-                    const artistNames = data.item.artists.map(artist => artist.name).join(', ');
-                    const albumArt = data.item.album.images[0].url;
-                    nowPlaying.innerHTML = `
-                        <p><strong>${trackName}</strong> by ${artistNames}</p>
-                        <img src="${albumArt}" width="100" alt="Album Art">
-                    `;
-                } else {
-                    nowPlaying.textContent = 'No track currently playing.';
-                }
-            } catch (err) {
-                document.getElementById('nowPlaying').textContent = 'Error fetching Spotify data: ' + err.message;
-            }
-        }
-    </script>
+  // Spotify Now Playing
+  async function fetchSpotifyData(token) {
+    try {
+      const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const out = document.getElementById('nowPlaying');
+      if (data?.item) {
+        const name = data.item.name;
+        const artist = data.item.artists.map(a => a.name).join(', ');
+        const img = data.item.album.images[0].url;
+        out.innerHTML = `<p><strong>${name}</strong> by ${artist}</p><img src="${img}" width="100">`;
+      } else out.textContent = 'Nothing playing.';
+    } catch (err) {
+      document.getElementById('nowPlaying').textContent = 'Spotify error: ' + err.message;
+    }
+  }
+  // Dummy File Upload Handler (for hooking to API)
+  document.getElementById('uploadForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const file = document.getElementById('fileInput').files[0];
+    if (!file) return;
+    document.getElementById('uploadResult').textContent = `Scanned "${file.name}" (pretend response here)`;
+    // Hook to VirusTotal or ClaimSav via your proxy here
+  });
+</script>
 </body>
 </html>
