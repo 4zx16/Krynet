@@ -1,28 +1,48 @@
-BSD 3-Clause License
+📄 KRYNET.AI PROPRIETARY SOFTWARE LICENSE AGREEMENT
+Version 1.0 — Effective as of June 24, 2025
+Copyright © 2025 Bloodware, Inc. All Rights Reserved.
 
-Copyright (c) 2025, 4zx
+This License Agreement (“Agreement”) is a legal agreement between you (“Licensee”) and Bloodware, Inc., the owner and operator of Krynet.ai (“Licensor”). By downloading, installing, accessing, or using the Krynet.ai software and services (“Software”), you agree to be bound by the terms of this Agreement.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+1. GRANT OF LICENSE
+Licensor grants Licensee a limited, non-exclusive, non-transferable, non-sublicensable, revocable license to use the Software in executable form solely for lawful, personal, non-commercial use, unless otherwise authorized in writing.
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
+2. RESTRICTIONS
+Licensee shall not, and shall not permit any third party to:
 
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+Copy, reproduce, modify, distribute, or create derivative works of the Software;
 
-3. Neither the name of the copyright holder nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
+Reverse engineer, decompile, disassemble, or otherwise attempt to discover the source code or underlying algorithms;
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Sell, rent, lease, sublicense, or otherwise transfer the Software or rights to use it;
+
+Use the Software for any unlawful or unauthorized purpose;
+
+Use the Krynet, Bloodware, or associated trademarks, names, or logos without express written permission.
+
+3. OWNERSHIP
+The Software is licensed, not sold. All rights, title, and interest in and to the Software, including but not limited to intellectual property rights, remain exclusively with Bloodware, Inc. Nothing in this Agreement shall be construed as granting ownership or any other rights beyond this license.
+
+4. CONFIDENTIALITY
+The Software contains proprietary, confidential, and trade secret information of Licensor. Licensee agrees not to disclose or permit unauthorized access to any portion of the Software.
+
+5. THIRD-PARTY COMPONENTS
+The Software may include components licensed under open-source terms (e.g., MIT, BSD, LGPL, MPL). These components are subject to their own licenses, which are listed in the accompanying NOTICE.md file. This Agreement does not override those third-party terms.
+
+6. NO WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. BLOODWARE, INC. DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR THAT THE SOFTWARE WILL BE ERROR-FREE OR OPERATE WITHOUT INTERRUPTION.
+
+7. LIMITATION OF LIABILITY
+IN NO EVENT SHALL BLOODWARE, INC. BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES (INCLUDING, WITHOUT LIMITATION, LOSS OF BUSINESS, REVENUE, PROFITS, DATA, OR USE) ARISING OUT OF OR RELATED TO THE SOFTWARE OR THIS AGREEMENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+8. TERMINATION
+This license is effective until terminated. It will terminate automatically without notice if Licensee breaches any part of this Agreement. Upon termination, Licensee must cease all use of the Software and destroy all copies.
+
+9. GOVERNING LAW
+This Agreement shall be governed by and construed in accordance with the laws of the State of New York (USA) and the Province of Ontario (Canada), without regard to conflict of laws principles. Any legal action or proceeding shall be brought exclusively in courts located in those jurisdictions.
+
+10. ENTIRE AGREEMENT
+This Agreement constitutes the complete and exclusive agreement between Licensee and Licensor relating to the Software, superseding all prior or contemporaneous communications.
+
+🔐 TL;DR (Non-Legal Summary)
+You can use Krynet.ai. You can’t copy it, crack it, resell it, or mess with the guts. Bloodware, Inc. owns everything. Break the rules, and you’re out — with legal consequences. This license means business.
