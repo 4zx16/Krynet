@@ -53,11 +53,11 @@
 <body>
   <div class="box">
     <h1>Routing Securely...</h1>
-    <p>You’re being sent privately through a safe redirect.</p>
+    <p>You’re being sent directly to the website.</p>
 
     <div id="urlDisplay" class="url-display">Loading...</div>
 
-    <div class="loading">Hold up… anonymizing your traffic.</div>
+    <div class="loading">Hold up… taking you there.</div>
   </div>
 
   <script>
@@ -68,11 +68,18 @@
     if (!target) {
       display.textContent = "Error: No URL provided.";
     } else {
-      display.textContent = target;
+      let finalUrl = target;
+      try {
+        const u = new URL(target.startsWith("http") ? target : `https://${target}`);
+        finalUrl = u.href;
+      } catch (e) {
+        // leave as-is if malformed
+      }
 
-      // Direct redirect since Startpage anon-view is unreliable
+      display.textContent = finalUrl;
+
       setTimeout(() => {
-        window.location.href = target;
+        window.location.href = finalUrl;
       }, 900);
     }
   </script>
