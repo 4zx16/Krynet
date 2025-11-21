@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KrySearch Redirect</title>
+  <title>KrySearch</title>
 
   <style>
     body {
@@ -33,13 +33,27 @@
       margin-bottom: 10px;
     }
 
-    .url-display {
-      word-break: break-all;
-      background: #2b2b2b;
+    input {
+      width: 100%;
       padding: 12px;
       border-radius: 8px;
-      margin: 10px 0 20px 0;
-      font-size: 0.9rem;
+      border: none;
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      background: #4da6ff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #3399ff;
     }
 
     .loading {
@@ -52,139 +66,45 @@
 
 <body>
   <div class="box">
-    <h1>Routing Securely...</h1>
-    <p>You’re being sent directly to the website.</p>
+    <h1>KrySearch</h1>
+    <p>Enter text to search securely or a URL to open directly.</p>
 
-    <div id="urlDisplay" class="url-display">Loading...</div>
+    <input type="text" id="searchInput" placeholder="Type your search here or enter a URL..." />
+    <button id="searchBtn">Go</button>
 
-    <div class="loading">Hold up… taking you there.</div>
+    <div class="loading" id="loadingText"></div>
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const target = params.get('url');
-    const display = document.getElementById('urlDisplay');
+    const input = document.getElementById('searchInput');
+    const btn = document.getElementById('searchBtn');
+    const loading = document.getElementById('loadingText');
 
-    if (!target) {
-      display.textContent = "Error: No URL provided.";
-    } else {
-      let finalUrl = target;
-      try {
-        const u = new URL(target.startsWith("http") ? target : `https://${target}`);
-        finalUrl = u.href;
-      } catch (e) {
-        // leave as-is if malformed
+    function performSearchOrOpen(value) {
+      if (!value) {
+        loading.textContent = 'Please enter a search term or URL.';
+        return;
       }
 
-      display.textContent = finalUrl;
-
-      setTimeout(() => {
-        window.location.href = finalUrl;
-      }, 900);
-    }
-  </script>
-
-  <div style="margin-top:20px; text-align:center;">
-    <h2 style="font-size:1.1rem; margin-bottom:10px;">Test Links</h2>
-    <a href="?url=https://youtube.com" style="color:#4da6ff; display:block; margin:6px 0;">YouTube</a>
-    <a href="?url=https://krynet.ai" style="color:#4da6ff; display:block; margin:6px 0;">Krynet</a>
-    <a href="?url=https://proton.me" style="color:#4da6ff; display:block; margin:6px 0;">Proton</a>
-    <a href="?url=https://github.com" style="color:#4da6ff; display:block; margin:6px 0;">GitHub</a>
-  </div>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KrySearch Redirect</title>
-
-  <style>
-    body {
-      font-family: Inter, Arial, sans-serif;
-      background: #0f0f0f;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
-    }
-
-    .box {
-      background: #1a1a1a;
-      padding: 30px;
-      border-radius: 14px;
-      max-width: 450px;
-      box-shadow: 0px 0px 20px rgba(0,0,0,0.45);
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-    }
-
-    .url-display {
-      word-break: break-all;
-      background: #2b2b2b;
-      padding: 12px;
-      border-radius: 8px;
-      margin: 10px 0 20px 0;
-      font-size: 0.9rem;
-    }
-
-    .loading {
-      margin-top: 15px;
-      font-size: 0.9rem;
-      opacity: 0.7;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="box">
-    <h1>Routing Securely...</h1>
-    <p>You’re being sent directly to the website.</p>
-
-    <div id="urlDisplay" class="url-display">Loading...</div>
-
-    <div class="loading">Hold up… taking you there.</div>
-  </div>
-
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const target = params.get('url');
-    const display = document.getElementById('urlDisplay');
-
-    if (!target) {
-      display.textContent = "Error: No URL provided.";
-    } else {
-      let finalUrl = target;
-      try {
-        const u = new URL(target.startsWith("http") ? target : `https://${target}`);
-        finalUrl = u.href;
-      } catch (e) {
-        // leave as-is if malformed
+      if (value.startsWith('https://')) {
+        loading.textContent = 'Opening URL...';
+        window.open(value, '_blank');
+      } else {
+        loading.textContent = 'Searching securely...';
+        const searchUrl = `https://www.startpage.com/sp/search?query=${encodeURIComponent(value)}`;
+        window.open(searchUrl, '_blank');
       }
+    }
 
-      display.textContent = finalUrl;
+    btn.addEventListener('click', () => performSearchOrOpen(input.value.trim()));
+    input.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearchOrOpen(input.value.trim()); });
 
-      setTimeout(() => {
-        window.location.href = finalUrl;
-      }, 900);
+    // Detect query from URL
+    const params = new URLSearchParams(window.location.search);
+    let query = params.get('url') || params.get('q') || params.get('');
+    if (query) {
+      performSearchOrOpen(query.trim());
     }
   </script>
-
-  <div style="margin-top:20px; text-align:center;">
-    <h2 style="font-size:1.1rem; margin-bottom:10px;">Test Links</h2>
-    <a href="?url=https://youtube.com" style="color:#4da6ff; display:block; margin:6px 0;">YouTube</a>
-    <a href="?url=https://krynet.ai" style="color:#4da6ff; display:block; margin:6px 0;">Krynet</a>
-    <a href="?url=https://proton.me" style="color:#4da6ff; display:block; margin:6px 0;">Proton</a>
-    <a href="?url=https://github.com" style="color:#4da6ff; display:block; margin:6px 0;">GitHub</a>
-  </div>
 </body>
 </html>
