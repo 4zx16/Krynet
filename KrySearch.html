@@ -53,7 +53,7 @@
 <body>
   <div class="box">
     <h1>Routing Securely...</h1>
-    <p>You’re being sent privately through Startpage.</p>
+    <p>You’re being sent privately through a safe redirect.</p>
 
     <div id="urlDisplay" class="url-display">Loading...</div>
 
@@ -61,7 +61,6 @@
   </div>
 
   <script>
-    // Grab ?url= parameter
     const params = new URLSearchParams(window.location.search);
     const target = params.get('url');
     const display = document.getElementById('urlDisplay');
@@ -71,16 +70,13 @@
     } else {
       display.textContent = target;
 
-      // Build Startpage Anonymous View URL
-      // Updated Startpage Anonymous View endpoint (current functional proxy)
-      const sp = `https://www.startpage.com/sp/anon-view?url=${encodeURIComponent(target)}`;
-
-      // Auto-redirect with small delay for UX
+      // Direct redirect since Startpage anon-view is unreliable
       setTimeout(() => {
-        window.location.href = sp;
+        window.location.href = target;
       }, 900);
     }
   </script>
+
   <div style="margin-top:20px; text-align:center;">
     <h2 style="font-size:1.1rem; margin-bottom:10px;">Test Links</h2>
     <a href="?url=https://youtube.com" style="color:#4da6ff; display:block; margin:6px 0;">YouTube</a>
