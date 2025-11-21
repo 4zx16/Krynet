@@ -72,7 +72,8 @@
       display.textContent = target;
 
       // Build Startpage Anonymous View URL
-      const sp = `https://www.startpage.com/av/anon-url.php?u=${encodeURIComponent(target)}`;
+      // Updated Startpage Anonymous View endpoint (current functional proxy)
+      const sp = `https://www.startpage.com/sp/anon-view?url=${encodeURIComponent(target)}`;
 
       // Auto-redirect with small delay for UX
       setTimeout(() => {
