@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KrySearch Redirect</title>
+
+  <style>
+    body {
+      font-family: Inter, Arial, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+
+    .box {
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 14px;
+      max-width: 450px;
+      box-shadow: 0px 0px 20px rgba(0,0,0,0.45);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    .url-display {
+      word-break: break-all;
+      background: #2b2b2b;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0 20px 0;
+      font-size: 0.9rem;
+    }
+
+    .loading {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <h1>Routing Securely...</h1>
+    <p>You’re being sent privately through Startpage.</p>
+
+    <div id="urlDisplay" class="url-display">Loading...</div>
+
+    <div class="loading">Hold up… anonymizing your traffic.</div>
+  </div>
+
+  <script>
+    // Grab ?url= parameter
+    const params = new URLSearchParams(window.location.search);
+    const target = params.get('url');
+    const display = document.getElementById('urlDisplay');
+
+    if (!target) {
+      display.textContent = "Error: No URL provided.";
+    } else {
+      display.textContent = target;
+
+      // Build Startpage Anonymous View URL
+      const sp = `https://www.startpage.com/av/anon-url.php?u=${encodeURIComponent(target)}`;
+
+      // Auto-redirect with small delay for UX
+      setTimeout(() => {
+        window.location.href = sp;
+      }, 900);
+    }
+  </script>
+  <div style="margin-top:20px; text-align:center;">
+    <h2 style="font-size:1.1rem; margin-bottom:10px;">Test Links</h2>
+    <a href="?url=https://youtube.com" style="color:#4da6ff; display:block; margin:6px 0;">YouTube</a>
+    <a href="?url=https://krynet.ai" style="color:#4da6ff; display:block; margin:6px 0;">Krynet</a>
+    <a href="?url=https://proton.me" style="color:#4da6ff; display:block; margin:6px 0;">Proton</a>
+    <a href="?url=https://github.com" style="color:#4da6ff; display:block; margin:6px 0;">GitHub</a>
+  </div>
+</body>
+</html>
