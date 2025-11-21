@@ -1,43 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Krynet.ai — Sneak Peek</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Krynet.ai — Sneak Peek (Badged)</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     body { margin: 0; padding: 0; font-family: 'Orbitron', sans-serif; background: #05050a; color: #f0f0f0; }
     header { padding: 4rem 2rem; text-align: center; background: radial-gradient(circle at top, #0f0f1a, #05050a); }
     h1 { font-size: 4rem; color: #ff0080; text-shadow: 0 0 15px #ff0080, 0 0 30px #ff00ff; }
-    .intro { font-size: 1.5rem; max-width: 800px; margin: 1rem auto 0 auto; color: #ccc; }
-    .release { text-align: center; margin-top: 2rem; font-size: 1.4rem; color: #00fff7; }
-    .platforms { display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; }
-    .platform { display: flex; flex-direction: column; align-items: center; color: #00fff7; font-weight: bold; }
-    .platform i { font-size: 2.5rem; margin-bottom: 0.5rem; }
-    .tech { display: flex; justify-content: center; flex-wrap: wrap; gap: 2rem; margin: 1rem 0 2rem 0; }
-    .tech-item { display: flex; flex-direction: column; align-items: center; color: #00fff7; font-weight: bold; }
-    .tech-item i { font-size: 2rem; margin-bottom: 0.5rem; }
-    section { padding: 3rem 2rem; max-width: 1000px; margin: auto; }
-    h2 { font-size: 2rem; margin-top: 2rem; border-left: 5px solid #ff0080; padding-left: 1rem; }
-    ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 1.5rem; }
-    li { flex: 1 1 300px; background: rgba(255,0,128,0.05); border: 2px solid #ff0080; border-radius: 15px; padding: 1.5rem; transition: transform 0.3s, box-shadow 0.3s; position: relative; }
-    li:hover { transform: translateY(-10px) rotate(-1deg); box-shadow: 0 0 20px #ff0080, 0 0 40px #ff00ff; }
-    li i { font-size: 2rem; margin-bottom: 1rem; color: #ff0080; display: block; }
-    .badge { position: absolute; top: 10px; right: 10px; background: #00fff7; color: #05050a; font-weight: bold; font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 10px; }
-    .footer { text-align: center; padding: 3rem; font-size: 1rem; color: #999; border-top: 2px solid #ff0080; }
+    .intro { font-size: 1.2rem; max-width: 900px; margin: 1rem auto 0 auto; color: #ccc; }
+    .release { text-align: center; margin-top: 1.5rem; font-size: 1.05rem; color: #00fff7; }
+    .platforms, .tech { display: flex; justify-content: center; gap: 1.2rem; margin-top: 1rem; flex-wrap: wrap; }
+    .platform, .tech-item { display: flex; flex-direction: column; align-items: center; color: #00fff7; font-weight: bold; }
+    .platform i, .tech-item i { font-size: 1.6rem; margin-bottom: 0.35rem; }
+
+    section { padding: 2.2rem 1.2rem; max-width: 1100px; margin: auto; }
+    h2 { font-size: 1.6rem; margin-top: 1.8rem; border-left: 5px solid #ff0080; padding-left: 0.8rem; }
+    ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 1rem; }
+    li { flex: 1 1 280px; background: rgba(255,0,128,0.04); border: 1.5px solid #ff0080; border-radius: 12px; padding: 1rem; transition: .22s; position: relative; }
+    li:hover { transform: translateY(-6px); box-shadow: 0 0 18px #ff0080, 0 0 30px #ff00ff; }
+    li i { font-size: 1.6rem; margin-bottom: 0.6rem; color: #ff0080; display: block; }
+
+    .badge { position: absolute; top: 10px; right: 10px; background: #00fff7; color: #05050a; font-weight: bold; font-size: 0.7rem; padding: 0.28rem 0.5rem; border-radius: 9px; }
+    .badge-security { background:#ff3b30; color:#fff; }
+    .badge-premium { background:#ffd700; color:#05050a; }
+    .badge-dev { background:#7f00ff; color:#fff; }
+    .badge-core { background:#00ff88; color:#05050a; }
+    .badge-game { background:#00aaff; color:#05050a; }
+
+    .footer { text-align: center; padding: 2.5rem; font-size: 0.95rem; color: #bbb; border-top: 1.5px solid #ff0080; }
   </style>
 </head>
 <body>
   <header>
     <h1><i class="fas fa-globe"></i> Krynet.ai Preview</h1>
-    <p class="intro">Krynet.ai is the next-gen platform: secure, private, AI-powered, and monetization-ready. Dive into user-generated content, multiplayer & solo games, quests, premium features, and revenue opportunities for users and developers.</p>
-    <p class="release"><i class="fas fa-calendar-alt"></i> Release Date: 2030</p>
+    <p class="intro">Krynet.ai — privacy‑first, AI‑powered, creator‑driven platform for communication, gaming, UGC, customization, and monetization. This preview highlights core features and program rules.</p>
+    <p class="release"><i class="fas fa-calendar-alt"></i> Release: 2030</p>
+
     <div class="platforms">
       <div class="platform"><i class="fab fa-windows"></i>Windows</div>
       <div class="platform"><i class="fab fa-linux"></i>Linux</div>
       <div class="platform"><i class="fab fa-apple"></i>iOS</div>
       <div class="platform"><i class="fab fa-android"></i>Android</div>
     </div>
+
     <div class="tech">
       <div class="tech-item"><i class="fas fa-code"></i>C++</div>
       <div class="tech-item"><i class="fas fa-code"></i>C#</div>
@@ -49,75 +56,83 @@
       <div class="tech-item"><i class="fas fa-code"></i>TypeScript</div>
       <div class="tech-item"><i class="fas fa-database"></i>SQL</div>
       <div class="tech-item"><i class="fas fa-file-code"></i>JSON</div>
-      <div class="tech-item"><i class="fas fa-laptop-code"></i>+ more</div>
     </div>
   </header>
 
-  <section>
-    <h2>Core Highlights</h2>
+  <section id="core-platform">
+    <h2>Core Platform</h2>
     <ul>
-      <li><i class="fas fa-bolt"></i>Ultra-fast API-driven communication</li>
-      <li><i class="fas fa-user-shield"></i>Encrypted messaging & privacy-first profiles</li>
-      <li><i class="fas fa-robot"></i>AI-driven adaptive moderation</li>
-      <li><i class="fas fa-eye-slash"></i>NSFW detection & smart content blurring</li>
-      <li><i class="fas fa-bell"></i>Real-time alerts for suspicious activity</li>
-      <li><i class="fas fa-credit-card"></i>All transactions via Stripe; Apple Pay, Google Pay, PayPal, Cash App, Venmo, GNU Taler</li>
-      <li><i class="fas fa-music"></i>Ad-free streaming: Apple Music, YouTube Music, Spotify Premium</li>
-      <li><i class="fas fa-tv"></i>Next-gen graphics: DLSS, FSR, XeSS, MetalFX, ASR</li>
-      <li><i class="fas fa-gamepad"></i>Integrated Steam store for buying games</li>
-      <li><i class="fas fa-rocket"></i>Server boosts for extra features and perks</li>
-      <li><i class="fas fa-coins"></i>Revenue & Monetization <span class="badge">💰</span>: Krynet Premium, quests, company-sponsored ads, paid mods, partnerships, merchandise, developer integrations</li>
-      <li><i class="fas fa-cloud"></i>100% cloud-hosted via CoreWeave</li>
-      <li><i class="fas fa-code-branch"></i>Built with open-source code & custom closed-source components</li>
-    </ul>
-
-    <h2>User-Generated Content (UGC)</h2>
-    <ul>
-      <li><i class="fas fa-paint-brush"></i>Themes, mods, decorations, and profile effects created by users <span class="badge">UGC</span></li>
-      <li><i class="fas fa-check-circle"></i>All UGC reviewed by AI & staff for compliance</li>
-      <li><i class="fas fa-money-bill-wave"></i>Users can sell approved content; Krynet takes a small marketplace fee (20-25%)</li>
-      <li><i class="fas fa-ban"></i>Strike system: 3 strikes for TOS violations → removed from UGC program</li>
-      <li><i class="fas fa-lock"></i>NSFW content only for verified 18+ users</li>
-      <li><i class="fas fa-gamepad"></i>Solo & multiplayer games, interactive activities, mini-games, and social experiences</li>
-    </ul>
-
-    <h2>Platform Activities</h2>
-    <ul>
-      <li><i class="fas fa-dice"></i>Multiplayer: pool, dice, watch together, mini-games</li>
-      <li><i class="fas fa-gamepad"></i>Solo: mini-games & activities while waiting for friends</li>
-      <li><i class="fas fa-flag-checkered"></i>Quests with rewards for users, sponsored by companies</li>
-    </ul>
-
-    <h2>Privacy & Security</h2>
-    <ul>
-      <li><i class="fas fa-user-secret"></i>Anonymous usage</li>
-      <li><i class="fas fa-ban"></i>AdNauseam-style ad obfuscation & endpoint protection</li>
-      <li><i class="fas fa-searchengin"></i>Private search via KrySearch</li>
-      <li><i class="fas fa-shield-alt"></i>Military-grade encryption & zero-trust network security</li>
-      <li><i class="fas fa-database"></i>Malware/tracker protection via AI DNS, Cloudflare, NextDNS</li>
-      <li><i class="fas fa-server"></i>File hosting via free/open-source hosts: file.io, catbox, litterbox</li>
-      <li><i class="fas fa-key"></i>No password storage; auth & payments handled via Auth0 & Stripe</li>
-    </ul>
-
-    <h2>Account & Auth</h2>
-    <ul>
-      <li><i class="fas fa-shield-virus"></i>MFA: TOTP, hardware keys, passkeys, email verification</li>
-      <li><i class="fas fa-fingerprint"></i>Biometric: fingerprint & Face ID</li>
-      <li><i class="fas fa-exclamation-triangle"></i>Active monitoring for suspicious activity</li>
-    </ul>
-
-    <h2>Developer & Apps</h2>
-    <ul>
-      <li><i class="fas fa-file-signature"></i>Register apps through KryNet Developer Portal</li>
-      <li><i class="fas fa-ban"></i>18+ apps flagged for NSFW compliance</li>
-      <li><i class="fas fa-key"></i>Permission requests reviewed</li>
-      <li><i class="fas fa-rocket"></i>Paid mods & content allowed; small platform fee <span class="badge">💵</span></li>
-      <li><i class="fas fa-coins"></i>Developers earn revenue via premium content, UGC, and integrations <span class="badge">💰</span></li>
+      <li><i class="fas fa-code-branch"></i>Hybrid open‑source foundation + custom modules <span class="badge badge-core">CORE</span></li>
+      <li><i class="fas fa-cloud"></i>Cloud‑hosted exclusively via CoreWeave <span class="badge badge-core">CORE</span></li>
+      <li><i class="fas fa-rocket"></i>Ultra‑fast API‑driven communication</li>
+      <li><i class="fas fa-tv"></i>Next‑gen graphics: DLSS, FSR, XeSS, MetalFX, ASR <span class="badge badge-core">CORE</span></li>
+      <li><i class="fas fa-store"></i>Integrated Steam store access</li>
     </ul>
   </section>
 
-  <div class="footer">
-    © Krynet.ai — Sneak peek of the ultimate privacy-first, AI-powered, monetization-rich platform coming in 2030.
-  </div>
+  <section id="privacy-security">
+    <h2>Privacy & Security</h2>
+    <ul>
+      <li><i class="fas fa-user-secret"></i>Anonymous account support</li>
+      <li><i class="fas fa-ban"></i>Ad obfuscation & privacy protections</li>
+      <li><i class="fas fa-search"></i>Private search via KrySearch</li>
+      <li><i class="fas fa-shield-alt"></i>Zero‑trust, military‑grade encryption <span class="badge badge-security">SEC</span></li>
+      <li><i class="fas fa-database"></i>AI DNS filtering: NextDNS + Cloudflare</li>
+      <li><i class="fas fa-server"></i>File hosting: file.io, catbox, litterbox</li>
+      <li><i class="fas fa-key"></i>Passwordless login via Auth0</li>
+      <li><i class="fas fa-shield-virus"></i>MFA: TOTP, hardware keys, passkeys <span class="badge badge-security">SEC</span></li>
+      <li><i class="fas fa-fingerprint"></i>Biometric login (Face ID & fingerprint)</li>
+      <li><i class="fas fa-exclamation-triangle"></i>Active suspicious‑activity monitoring</li>
+    </ul>
+  </section>
+  <section id="communication">
+    <h2>Communication & Social</h2>
+    <ul>
+      <li><i class="fas fa-user-shield"></i>Encrypted messaging <span class="badge badge-security">SEC</span></li>
+      <li><i class="fas fa-id-card"></i>Privacy‑first profiles</li>
+      <li><i class="fas fa-robot"></i>AI‑driven adaptive moderation</li>
+      <li><i class="fas fa-eye-slash"></i>NSFW auto‑blur + detection <span class="badge badge-security">SEC</span></li>
+      <li><i class="fas fa-bell"></i>Real‑time alerts for risky actions</li>
+    </ul>
+  </section>
+  <section id="games">
+    <h2>Games & Activities</h2>
+    <ul>
+      <li><i class="fas fa-dice"></i>Multiplayer: dice, pool, watch‑together, mini‑games <span class="badge badge-game">GAME</span></li>
+      <li><i class="fas fa-gamepad"></i>Solo mini‑games while waiting <span class="badge badge-game">GAME</span></li>
+      <li><i class="fas fa-flag-checkered"></i>Quests with rewards (sponsored)</li>
+    </ul>
+  </section>
+  <section id="economy">
+    <h2>Economy & Monetization</h2>
+    <ul>
+      <li><i class="fas fa-credit-card"></i>Payments: Stripe, Apple Pay, Google Pay, Venmo, Cash App, PayPal, GNU Taler</li>
+      <li><i class="fas fa-coins"></i>UGC earnings optional; only available to verified UGC‑Program creators <span class="badge badge-dev">UGC</span></li>
+      <li><i class="fas fa-money-bill-wave"></i>Marketplace fee: 20–25% <span class="badge badge-dev">UGC</span></li>
+      <li><i class="fas fa-rocket"></i>Server boosts & premium perks <span class="badge badge-premium">PREM</span></li>
+      <li><i class="fas fa-coins"></i>Developers: integrations, paid mods, partnerships <span class="badge badge-dev">DEV</span></li>
+    </ul>
+  </section>
+  <section id="ugc">
+    <h2>User‑Generated Content (UGC)</h2>
+    <ul>
+      <li><i class="fas fa-paint-brush"></i>Themes, mods, profile effects, VFX <span class="badge badge-dev">UGC</span></li>
+      <li><i class="fas fa-check-circle"></i>AI + staff review for compliance <span class="badge badge-dev">UGC</span></li>
+      <li><i class="fas fa-money-bill-wave"></i>Marketplace sales for UGC‑Program members only; max price $15 unless verified original‑work proof (then up to $20–25) <span class="badge badge-dev">UGC</span></li>
+      <li><i class="fas fa-ban"></i>3‑strike enforcement for violations <span class="badge badge-dev">UGC</span></li>
+      <li><i class="fas fa-lock"></i>NSFW allowed for verified 18+ <span class="badge badge-dev">UGC</span></li>
+    </ul>
+  </section>
+  <section id="developer">
+    <h2>Developer Platform</h2>
+    <ul>
+      <li><i class="fas fa-file-signature"></i>Developer portal for apps & integrations</li>
+      <li><i class="fas fa-key"></i>Permission request system</li>
+      <li><i class="fas fa-ban"></i>18+ apps flagged for compliance</li>
+      <li><i class="fas fa-rocket"></i>Paid mods supported <span class="badge badge-dev">UGC</span></li>
+      <li><i class="fas fa-coins"></i>Developers earn via premium content & UGC <span class="badge badge-dev">UGC</span></li>
+    </ul>
+  </section>
+  <div class="footer">© Krynet.ai — 2030 Preview.</div>
 </body>
 </html>
