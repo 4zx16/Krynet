@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Krynet.ai — Dev & User Preview</title>
+  <title>Krynet.ai — Sneak Peek</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     body { margin: 0; padding: 0; font-family: 'Orbitron', sans-serif; background: #05050a; color: #f0f0f0; }
@@ -20,16 +20,17 @@
     section { padding: 3rem 2rem; max-width: 1000px; margin: auto; }
     h2 { font-size: 2rem; margin-top: 2rem; border-left: 5px solid #ff0080; padding-left: 1rem; }
     ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 1.5rem; }
-    li { flex: 1 1 300px; background: rgba(255,0,128,0.05); border: 2px solid #ff0080; border-radius: 15px; padding: 1.5rem; transition: transform 0.3s, box-shadow 0.3s; }
+    li { flex: 1 1 300px; background: rgba(255,0,128,0.05); border: 2px solid #ff0080; border-radius: 15px; padding: 1.5rem; transition: transform 0.3s, box-shadow 0.3s; position: relative; }
     li:hover { transform: translateY(-10px) rotate(-1deg); box-shadow: 0 0 20px #ff0080, 0 0 40px #ff00ff; }
     li i { font-size: 2rem; margin-bottom: 1rem; color: #ff0080; display: block; }
+    .badge { position: absolute; top: 10px; right: 10px; background: #00fff7; color: #05050a; font-weight: bold; font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 10px; }
     .footer { text-align: center; padding: 3rem; font-size: 1rem; color: #999; border-top: 2px solid #ff0080; }
   </style>
 </head>
 <body>
   <header>
     <h1><i class="fas fa-globe"></i> Krynet.ai Preview</h1>
-    <p class="intro">Krynet.ai is the next-gen platform for secure, cloud-first communication. With AI moderation, privacy-first design, user-generated content, integrated media & games, and safe monetization, Krynet sets a new standard for social interaction.</p>
+    <p class="intro">Krynet.ai is a next-gen platform: secure, private, AI-powered, and monetization-ready. Explore user-generated content, multiplayer/solo activities, premium features, and revenue opportunities for both users and developers.</p>
     <p class="release"><i class="fas fa-calendar-alt"></i> Release Date: 2030</p>
     <div class="platforms">
       <div class="platform"><i class="fab fa-windows"></i>Windows</div>
@@ -61,28 +62,41 @@
       <li><i class="fas fa-eye-slash"></i>NSFW detection & smart content blurring</li>
       <li><i class="fas fa-bell"></i>Real-time alerts for suspicious activity</li>
       <li><i class="fas fa-credit-card"></i>Flexible payments: Stripe, Apple Pay, Google Pay, PayPal, Cash App, Venmo, debit/credit, GNU Taler</li>
-      <li><i class="fas fa-music"></i>Ad-free media streaming: Apple Music, YouTube Music, Spotify Premium</li>
+      <li><i class="fas fa-music"></i>Ad-free streaming: Apple Music, YouTube Music, Spotify Premium</li>
       <li><i class="fas fa-tv"></i>Next-gen graphics: DLSS, FSR, XeSS, MetalFX, ASR</li>
-      <li><i class="fas fa-gamepad"></i>Integrated game store & purchases within platform</li>
-      <li><i class="fas fa-users"></i>User-generated content for themes, mods, effects, and activities</li>
-      <li><i class="fas fa-hand-holding-dollar"></i>Creators earn revenue: 20-25% platform fee applies</li>
-      <li><i class="fas fa-shield-virus"></i>AI-first content approval, followed by multiple human reviewers</li>
-      <li><i class="fas fa-exclamation-triangle"></i>Strike system for UGC: 3 strikes = revoked content creation privileges</li>
-      <li><i class="fas fa-lock"></i>Privacy-first: no storing passwords or payment info, fully cloud-based</li>
-      <li><i class="fas fa-network-wired"></i>Cloud infrastructure reduces server costs; external file hosting optional</li>
-      <li><i class="fas fa-dice"></i>Solo and multiplayer activities: mini-games, pool, dice, watch/draw together features</li>
-      <li><i class="fas fa-gavel"></i>Adult content restricted to verified 18+ users; hidden from minors</li>
+      <li><i class="fas fa-gamepad"></i>Integrated Steam store access for buying games</li>
+      <li><i class="fas fa-rocket"></i>Server boosts for extra features and perks</li>
+      <li><i class="fas fa-coins"></i>Revenue & Monetization <span class="badge">💰</span>: Krynet Premium, quests, company-sponsored ads, Krynet Enterprise, paid mods, partnerships, merchandise</li>
+    </ul>
+
+    <h2>User-Generated Content (UGC)</h2>
+    <ul>
+      <li><i class="fas fa-paint-brush"></i>Themes, decorations, mods, and profile effects created by users <span class="badge">UGC</span></li>
+      <li><i class="fas fa-check-circle"></i>All UGC reviewed by AI and staff for compliance</li>
+      <li><i class="fas fa-money-bill-wave"></i>Users can sell approved content; Krynet takes a small marketplace fee (20-25%)</li>
+      <li><i class="fas fa-ban"></i>Strike system: 3 strikes for violating TOS → removed from UGC program</li>
+      <li><i class="fas fa-lock"></i>NSFW content allowed only for verified 18+ users, visible only to them</li>
+      <li><i class="fas fa-gamepad"></i>Solo & Multiplayer games, interactive activities, mini-games, and social interactions</li>
+    </ul>
+
+    <h2>Platform Activities</h2>
+    <ul>
+      <li><i class="fas fa-dice"></i>Multiplayer activities: pool, dice, draw/watch together, mini-games</li>
+      <li><i class="fas fa-gamepad"></i>Solo activities & mini-games while waiting for friends</li>
     </ul>
 
     <h2>Privacy & Security</h2>
     <ul>
-      <li><i class="fas fa-user-secret"></i>TrackMeNot-style privacy protections</li>
-      <li><i class="fas fa-ban"></i>AdNauseam ad obfuscation</li>
+      <li><i class="fas fa-user-secret"></i>TrackMeNot-style privacy</li>
+      <li><i class="fas fa-ban"></i>AdNauseam, Bitdefender, ProtonMail, </li>
       <li><i class="fas fa-searchengin"></i>PrivacyWall-inspired secure search</li>
-      <li><i class="fas fa-shield-alt"></i>Bitdefender-level endpoint protection</li>
-      <li><i class="fas fa-lock"></i>End-to-End AES-256 encryption</li>
+      <li><i class="fas fa-shield-alt"></i>Military grade encryption.</li>
+      <li><i class="fas fa-lock"></i>End-to-End AES-256 and beyond Encryption</li>
       <li><i class="fas fa-network-wired"></i>Zero-trust network security</li>
       <li><i class="fas fa-database"></i>AI DNS + NextDNS for ad/tracker/malware blocking</li>
+      <li><i class="fas fa-server"></i>Cheap file hosting via open-source/free services (file.io, catbox, litterbox)</li>
+      <li><i class="fas fa-key"></i>No password storage; auth & payments handled via Auth0 and Stripe</li>
+      <li><i class="fas fa-lock-open"></i>Minimal recurring expenses → nearly pure profit</li>
     </ul>
 
     <h2>Account & Auth</h2>
@@ -95,21 +109,15 @@
     <h2>Developer & Apps</h2>
     <ul>
       <li><i class="fas fa-file-signature"></i>Apps must register through KryNet Developer Portal</li>
-      <li><i class="fas fa-id-badge"></i>Provide name, icon, description, contact</li>
       <li><i class="fas fa-ban"></i>18+ apps flagged for NSFW compliance</li>
       <li><i class="fas fa-key"></i>Permission requests reviewed</li>
-      <li><i class="fas fa-lock"></i>No private DM access or moderation circumvention</li>
-      <li><i class="fas fa-users"></i>Users can create content: themes, mods, effects, and activities</li>
-      <li><i class="fas fa-handshake"></i>Strict approval workflow: AI + multiple human reviewers</li>
-      <li><i class="fas fa-exclamation-triangle"></i>Strike system enforcement for rule violations</li>
-      <li><i class="fas fa-money-bill-wave"></i>Revenue share on paid content (creator sets price, max limits enforced)</li>
-      <li><i class="fas fa-dice"></i>UGC includes solo/multiplayer games and interactive activities</li>
-      <li><i class="fas fa-gavel"></i>Adult content is gated: verified 18+ users only, invisible to minors</li>
+      <li><i class="fas fa-rocket"></i>Paid mods & content allowed; small platform fee <span class="badge">💵</span></li>
+      <li><i class="fas fa-coins"></i>Developers earn revenue through premium content, UGC, and integrations <span class="badge">💰</span></li>
     </ul>
   </section>
 
   <div class="footer">
-    © Krynet.ai — Sneak peek of the ultimate privacy-first, AI-powered platform coming in 2030.
+    © Krynet.ai — Sneak peek of the ultimate privacy-first, AI-powered, monetization-rich platform coming in 2030.
   </div>
 </body>
 </html>
