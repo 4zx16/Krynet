@@ -1,35 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Public Embed</title>
-  <style>
-    body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #111; color: #fff; font-family: sans-serif; }
-    .embed { max-width: 90vw; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Universal Embed</title>
+
+<!-- Open Graph -->
+<meta property="og:type" content="video.other">
+<meta property="og:title" content="" id="og-title">
+<meta property="og:description" content="Embedded content" id="og-desc">
+<meta property="og:image" content="" id="og-image">
+<meta property="og:video" content="" id="og-video">
+<meta property="og:video:type" content="text/html">
+<meta property="og:video:width" content="1280">
+<meta property="og:video:height" content="720">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="player">
+<meta name="twitter:player" content="" id="twitter-player">
+<meta name="twitter:player:width" content="1280">
+<meta name="twitter:player:height" content="720">
+<meta name="twitter:title" content="" id="twitter-title">
+<meta name="twitter:description" content="Embedded content">
+<meta name="twitter:image" content="" id="twitter-image">
+
+<style>
+  body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#111; color:#fff; font-family:Arial,sans-serif; }
+  iframe, video, audio { max-width:90vw; max-height:80vh; border:none; border-radius:8px; }
+  .fallback { text-align:center; }
+  a { color:#1da1f2; text-decoration:none; }
+</style>
 </head>
 <body>
-  <div id="embed" class="embed">Loading…</div>
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const url = params.get('');
-    const container = document.getElementById('embed');
+<div id="container">Loading…</div>
 
-    if (!url) {
-      container.innerText = 'No URL provided.';
-    } else {
-      fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.html) container.innerHTML = data.html;
-          else container.innerHTML = `<a href="${url}" target="_blank">Open this link</a>`;
-        })
-        .catch(e => {
-          console.error(e);
-          container.innerHTML = `<a href="${url}" target="_blank">Open this link</a>`;
-        });
+<script>
+const params = new URLSearchParams(window.location.search);
+const url = params.get('');
+
+const container = document.getElementById('container');
+
+function setMeta(title, thumb, embedURL){
+  document.getElementById('og-title').setAttribute('content', title);
+  document.getElementById('og-image').setAttribute('content', thumb);
+  document.getElementById('og-video').setAttribute('content', embedURL);
+  document.getElementById('twitter-title').setAttribute('content', title);
+  document.getElementById('twitter-player').setAttribute('content', embedURL);
+  document.getElementById('twitter-image').setAttribute('content', thumb);
+}
+
+function fallback(url){
+  container.innerHTML = `<div class="fallback">Cannot embed this URL.<br><a href="${url}" target="_blank">Open Link</a></div>`;
+}
+
+if(!url){
+  fallback("No URL provided");
+} else {
+  try {
+    const decoded = decodeURIComponent(url);
+
+    // YouTube
+    if(decoded.includes('youtube.com') || decoded.includes('youtu.be')){
+      const match = decoded.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
+      if(match){
+        const id = match[1];
+        const iframeURL = `https://www.youtube.com/embed/${id}`;
+        const thumb = `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+        setMeta(`YouTube Video ${id}`, thumb, iframeURL);
+
+        const iframe = document.createElement('iframe');
+        iframe.src = iframeURL;
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        iframe.allowFullscreen = true;
+        container.innerHTML = '';
+        container.appendChild(iframe);
+      } else fallback(decoded);
     }
-  </script>
+    // Vimeo
+    else if(decoded.includes('vimeo.com')){
+      const match = decoded.match(/vimeo.com\/(\d+)/);
+      if(match){
+        const id = match[1];
+        const iframeURL = `https://player.vimeo.com/video/${id}`;
+        setMeta(`Vimeo Video ${id}`, '', iframeURL);
+        const iframe = document.createElement('iframe');
+        iframe.src = iframeURL;
+        iframe.allowFullscreen = true;
+        container.innerHTML = '';
+        container.appendChild(iframe);
+      } else fallback(decoded);
+    }
+    // SoundCloud
+    else if(decoded.includes('soundcloud.com')){
+      const iframeURL = `https://w.soundcloud.com/player/?url=${encodeURIComponent(decoded)}&auto_play=false`;
+      setMeta('SoundCloud Track', '', iframeURL);
+      const iframe = document.createElement('iframe');
+      iframe.src = iframeURL;
+      iframe.allowFullscreen = true;
+      container.innerHTML = '';
+      container.appendChild(iframe);
+    }
+    // Direct video
+    else if(decoded.match(/\.(mp4|webm|ogg)$/)){
+      setMeta('Video File', '', decoded);
+      const video = document.createElement('video');
+      video.controls = true;
+      video.src = decoded;
+      container.innerHTML = '';
+      container.appendChild(video);
+    }
+    // Direct audio
+    else if(decoded.match(/\.(mp3|wav|ogg)$/)){
+      setMeta('Audio File', '', decoded);
+      const audio = document.createElement('audio');
+      audio.controls = true;
+      audio.src = decoded;
+      container.innerHTML = '';
+      container.appendChild(audio);
+    }
+    // Fallback iframe
+    else{
+      const iframe = document.createElement('iframe');
+      iframe.src = decoded;
+      iframe.allowFullscreen = true;
+      container.innerHTML = '';
+      container.appendChild(iframe);
+      setMeta('Embedded Page', '', decoded);
+    }
+
+  } catch(e){
+    fallback(url);
+    console.error(e);
+  }
+}
+</script>
 </body>
 </html>
