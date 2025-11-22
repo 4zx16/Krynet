@@ -6,6 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KrySearch Embed Share</title>
 
+  <!-- Open Graph Meta Tags for Embeds on Discord/Other Sites -->
+  <meta property="og:title" content="KrySearch Embed" />
+  <meta property="og:description" content="Privacy-respecting embed from KrySearch." />
+  <meta property="og:type" content="video.other" />
+  <meta property="og:url" content="https://4zx16.github.io/Krynet/embed.html" />
+  <meta property="og:video" content="" id="ogVideo" />
+  <meta property="og:video:type" content="text/html" />
+  <meta property="og:video:width" content="560" />
+  <meta property="og:video:height" content="315" />
+
   <style>
     body {
       font-family: Inter, Arial, sans-serif;
@@ -71,7 +81,7 @@
 <body>
   <div class="box">
     <h1>KrySearch Embed Share</h1>
-    <p>Paste a video, song, or site URL to create a shareable embed that can be used on other sites.</p>
+    <p>Paste a video, song, or site URL to create a shareable embed that can appear on other sites.</p>
 
     <input type="text" id="embedLink" placeholder="Enter URL..." />
     <button id="loadBtn">Create Embed</button>
@@ -86,6 +96,7 @@
     const btn = document.getElementById('loadBtn');
     const container = document.getElementById('embedContainer');
     const loading = document.getElementById('loadingText');
+    const ogVideoTag = document.getElementById('ogVideo');
 
     function createEmbed(url) {
       container.innerHTML = '';
@@ -108,6 +119,7 @@
       iframe.referrerPolicy = 'strict-origin-when-cross-origin';
 
       container.appendChild(iframe);
+      ogVideoTag.content = iframeSrc; // update OG tag dynamically
       loading.textContent = 'Embed created! Copy the URL to share.';
     }
 
