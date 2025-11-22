@@ -14,8 +14,15 @@ function fetchJSON(url) {
 }
 
 export default async function handler(req, res) {
-  const { url } = req.query;
+  let { url } = req.query;
   if(!url) return res.status(400).send("No URL provided.");
+
+  // Prevent recursion
+  if(url.includes("/api/embed")) {
+    const match = url.match(/url=(.*)/);
+    if(match && match[1]) url = decodeURIComponent(match[1]);
+    else return res.status(400).send("Cannot embed the embed endpoint itself.");
+  }
 
   const decodedURL = decodeURIComponent(url);
   let embedHTML = "";
@@ -24,26 +31,32 @@ export default async function handler(req, res) {
   let type = "website";
 
   try {
-    // --- Known media sites ---
-    if(decodedURL.includes("youtube.com") || decodedURL.includes("youtu.be")) {
-      const id = decodedURL.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/)[1];
+    // --- YouTube ---
+    const ytMatch = decodedURL.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
+    if((decodedURL.includes("youtube.com") || decodedURL.includes("youtu.be")) && ytMatch) {
+      const id = ytMatch[1];
       embedHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}" allowfullscreen></iframe>`;
       thumb = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
       title = `YouTube Video ${id}`;
       type = "video.other";
     }
+    // --- Vimeo ---
     else if(decodedURL.includes("vimeo.com")) {
-      const id = decodedURL.match(/vimeo.com\/(\d+)/)[1];
-      embedHTML = `<iframe src="https://player.vimeo.com/video/${id}" allowfullscreen></iframe>`;
-      title = `Vimeo Video ${id}`;
-      type = "video.other";
+      const vimeoMatch = decodedURL.match(/vimeo.com\/(\d+)/);
+      const id = vimeoMatch ? vimeoMatch[1] : null;
+      if(id) {
+        embedHTML = `<iframe src="https://player.vimeo.com/video/${id}" allowfullscreen></iframe>`;
+        title = `Vimeo Video ${id}`;
+        type = "video.other";
+      }
     }
+    // --- SoundCloud ---
     else if(decodedURL.includes("soundcloud.com")) {
       embedHTML = `<iframe src="https://w.soundcloud.com/player/?url=${encodeURIComponent(decodedURL)}" allowfullscreen></iframe>`;
       title = "SoundCloud Track";
       type = "music.song";
     }
-    // --- Direct media files ---
+    // --- Direct media ---
     else if(decodedURL.match(/\.(mp4|webm)$/i)) {
       embedHTML = `<video controls src="${decodedURL}" style="max-width:90vw; max-height:80vh;"></video>`;
       title = "Video File";
@@ -54,7 +67,7 @@ export default async function handler(req, res) {
       title = "Audio File";
       type = "music.song";
     }
-    // --- Iframely fallback ---
+    // --- Fallback via Iframely ---
     else {
       try {
         const IFRA_KEY = "f3c7705c1575176127f4ae";
@@ -69,12 +82,10 @@ export default async function handler(req, res) {
           thumb = data.links.thumbnail.href;
         }
 
-        // Smart playable detection
+        // If it's a video/audio type, embed directly
         if(type.startsWith("video") || type.startsWith("music")) {
-          // Use iframe for playable media
           embedHTML = data.html || `<iframe src="${decodedURL}" allowfullscreen></iframe>`;
         } else {
-          // Generic card / HTML embed
           embedHTML = data.html || `<iframe src="${decodedURL}" allowfullscreen></iframe>`;
         }
 
