@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Discord-Style YouTube Embed</title>
+<title>Click-to-Play YouTube Embed</title>
 <style>
   body { font-family: Arial, sans-serif; background: #111; color: #fff; display: flex; justify-content: center; padding: 50px; }
   .video-card { width: 480px; border-radius: 8px; overflow: hidden; background: #222; cursor: pointer; transition: transform 0.2s; }
@@ -20,19 +20,24 @@
 <div id="container">Loading...</div>
 
 <script>
-function createCard(videoURL){
+// Function to create a Discord-style card that becomes a video on click
+function createVideoCard(videoURL){
+  // Extract YouTube video ID
   const idMatch = videoURL.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
   if(!idMatch) return document.getElementById('container').innerHTML = "Invalid YouTube link";
   const videoID = idMatch[1];
 
+  // Create card container
   const card = document.createElement('div');
   card.className = 'video-card';
 
+  // Thumbnail
   const thumbnail = document.createElement('img');
   thumbnail.className = 'thumbnail';
   thumbnail.src = `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`;
   card.appendChild(thumbnail);
 
+  // Info section
   const info = document.createElement('div');
   info.className = 'info';
   const title = document.createElement('p');
@@ -45,9 +50,12 @@ function createCard(videoURL){
   info.appendChild(desc);
   card.appendChild(info);
 
+  // On click, replace card content with iframe player
   card.addEventListener('click', () => {
     const iframe = document.createElement('iframe');
     iframe.src = `https://www.youtube-nocookie.com/embed/${videoID}?autoplay=1`;
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
     card.innerHTML = '';
     card.appendChild(iframe);
   });
@@ -55,16 +63,16 @@ function createCard(videoURL){
   return card;
 }
 
-// Get ?= URL from query string
+// Grab ?=URL from query string
 const params = new URLSearchParams(window.location.search);
 const url = params.get('');
+const container = document.getElementById('container');
 
 if(url){
-  const container = document.getElementById('container');
   container.innerHTML = '';
-  container.appendChild(createCard(url));
+  container.appendChild(createVideoCard(url));
 } else {
-  document.getElementById('container').innerHTML = "No video URL provided. Use ?=LINK";
+  container.innerHTML = "No video URL provided. Use ?=LINK";
 }
 </script>
 
