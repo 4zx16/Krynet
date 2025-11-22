@@ -5,7 +5,10 @@ function fetchJSON(url) {
     https.get(url, (res) => {
       let data = "";
       res.on("data", chunk => data += chunk);
-      res.on("end", () => resolve(JSON.parse(data)));
+      res.on("end", () => {
+        try { resolve(JSON.parse(data)); }
+        catch(e) { reject(e); }
+      });
     }).on("error", reject);
   });
 }
@@ -21,7 +24,7 @@ export default async function handler(req, res) {
   let type = "website";
 
   try {
-    // --- Known media types ---
+    // --- Known media sites ---
     if(decodedURL.includes("youtube.com") || decodedURL.includes("youtu.be")) {
       const id = decodedURL.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/)[1];
       embedHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}" allowfullscreen></iframe>`;
@@ -40,29 +43,48 @@ export default async function handler(req, res) {
       title = "SoundCloud Track";
       type = "music.song";
     }
-    else if(decodedURL.match(/\.(mp4|webm)$/)) {
+    // --- Direct media files ---
+    else if(decodedURL.match(/\.(mp4|webm)$/i)) {
       embedHTML = `<video controls src="${decodedURL}" style="max-width:90vw; max-height:80vh;"></video>`;
       title = "Video File";
       type = "video.other";
     }
-    else if(decodedURL.match(/\.(mp3|wav)$/)) {
+    else if(decodedURL.match(/\.(mp3|wav)$/i)) {
       embedHTML = `<audio controls src="${decodedURL}" style="max-width:90vw;"></audio>`;
       title = "Audio File";
       type = "music.song";
     }
-    // --- Fallback to Iframely ---
+    // --- Iframely fallback ---
     else {
-      const IFRA_KEY = "f3c7705c1575176127f4ae";
-      const apiURL = `https://iframe.ly/api/iframely?url=${encodeURIComponent(decodedURL)}&api_key=${IFRA_KEY}`;
-      const data = await fetchJSON(apiURL);
+      try {
+        const IFRA_KEY = "f3c7705c1575176127f4ae";
+        const apiURL = `https://iframe.ly/api/iframely?url=${encodeURIComponent(decodedURL)}&api_key=${IFRA_KEY}`;
+        const data = await fetchJSON(apiURL);
 
-      if(data.html) embedHTML = data.html;
-      if(data.meta && data.meta.title) title = data.meta.title;
-      if(data.links && data.links.thumbnail) thumb = data.links.thumbnail.href;
-      type = (data.meta && data.meta.type) || "website";
+        if(data.meta) {
+          title = data.meta.title || title;
+          type = data.meta.type || type;
+        }
+        if(data.links && data.links.thumbnail) {
+          thumb = data.links.thumbnail.href;
+        }
+
+        // Smart playable detection
+        if(type.startsWith("video") || type.startsWith("music")) {
+          // Use iframe for playable media
+          embedHTML = data.html || `<iframe src="${decodedURL}" allowfullscreen></iframe>`;
+        } else {
+          // Generic card / HTML embed
+          embedHTML = data.html || `<iframe src="${decodedURL}" allowfullscreen></iframe>`;
+        }
+
+      } catch(e) {
+        console.error("Iframely fetch failed", e);
+        embedHTML = `<iframe src="${decodedURL}" allowfullscreen></iframe>`;
+      }
     }
 
-    // --- Generate HTML ---
+    // --- HTML output ---
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -93,9 +115,9 @@ iframe, video, audio { max-width:90vw; max-height:80vh; border:none; border-radi
   ${embedHTML}
 </body>
 </html>
-    `;
+`;
 
-    res.setHeader('Content-Type','text/html');
+    res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
 
   } catch(e) {
