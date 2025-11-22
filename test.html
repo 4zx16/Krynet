@@ -3,94 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Universal Embed</title>
+<title>Discord-Style YouTube Embed</title>
 <style>
-  body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#111; color:#fff; font-family:sans-serif; }
-  iframe, video, audio { max-width:90vw; max-height:80vh; border:none; border-radius:8px; }
-  .fallback { text-align:center; }
+  body { font-family: Arial, sans-serif; background: #111; color: #fff; display: flex; justify-content: center; padding: 50px; }
+  .video-card { width: 480px; border-radius: 8px; overflow: hidden; background: #222; cursor: pointer; transition: transform 0.2s; }
+  .video-card:hover { transform: scale(1.02); }
+  .thumbnail { width: 100%; display: block; }
+  .info { padding: 10px; }
+  .title { font-size: 16px; font-weight: bold; margin: 0 0 5px 0; }
+  .description { font-size: 14px; color: #ccc; margin: 0; }
+  iframe { width: 100%; height: 270px; border: none; }
 </style>
 </head>
 <body>
-<div id="container">Loading…</div>
+
+<div id="container">Loading...</div>
 
 <script>
-const params = new URLSearchParams(window.location.search);
-const url = params.get(''); // grab ?=URL
-const container = document.getElementById('container');
+function createCard(videoURL){
+  const idMatch = videoURL.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
+  if(!idMatch) return document.getElementById('container').innerHTML = "Invalid YouTube link";
+  const videoID = idMatch[1];
 
-function fallback(msg){
-  container.innerHTML = `<div class="fallback">${msg}</div>`;
+  const card = document.createElement('div');
+  card.className = 'video-card';
+
+  const thumbnail = document.createElement('img');
+  thumbnail.className = 'thumbnail';
+  thumbnail.src = `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`;
+  card.appendChild(thumbnail);
+
+  const info = document.createElement('div');
+  info.className = 'info';
+  const title = document.createElement('p');
+  title.className = 'title';
+  title.innerText = `YouTube Video ${videoID}`;
+  const desc = document.createElement('p');
+  desc.className = 'description';
+  desc.innerText = 'Click to play';
+  info.appendChild(title);
+  info.appendChild(desc);
+  card.appendChild(info);
+
+  card.addEventListener('click', () => {
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${videoID}?autoplay=1`;
+    card.innerHTML = '';
+    card.appendChild(iframe);
+  });
+
+  return card;
 }
 
-if(!url){
-  fallback("No URL provided. Use ?=URL");
+// Get ?= URL from query string
+const params = new URLSearchParams(window.location.search);
+const url = params.get('');
+
+if(url){
+  const container = document.getElementById('container');
+  container.innerHTML = '';
+  container.appendChild(createCard(url));
 } else {
-  try{
-    const decoded = decodeURIComponent(url);
-
-    // YouTube
-    if(decoded.includes("youtube.com") || decoded.includes("youtu.be")){
-      const match = decoded.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
-      if(match){
-        const id = match[1];
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://www.youtube.com/embed/${id}`;
-        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-        iframe.allowFullscreen = true;
-        container.innerHTML = '';
-        container.appendChild(iframe);
-      } else fallback("Invalid YouTube link.");
-    }
-    // Vimeo
-    else if(decoded.includes("vimeo.com")){
-      const match = decoded.match(/vimeo.com\/(\d+)/);
-      if(match){
-        const id = match[1];
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://player.vimeo.com/video/${id}`;
-        iframe.allowFullscreen = true;
-        container.innerHTML = '';
-        container.appendChild(iframe);
-      } else fallback("Invalid Vimeo link.");
-    }
-    // SoundCloud
-    else if(decoded.includes("soundcloud.com")){
-      const iframe = document.createElement('iframe');
-      iframe.src = `https://w.soundcloud.com/player/?url=${encodeURIComponent(decoded)}&auto_play=false`;
-      iframe.allowFullscreen = true;
-      container.innerHTML = '';
-      container.appendChild(iframe);
-    }
-    // Direct video
-    else if(decoded.match(/\.(mp4|webm|ogg)$/)){
-      const video = document.createElement('video');
-      video.controls = true;
-      video.src = decoded;
-      container.innerHTML = '';
-      container.appendChild(video);
-    }
-    // Direct audio
-    else if(decoded.match(/\.(mp3|wav|ogg)$/)){
-      const audio = document.createElement('audio');
-      audio.controls = true;
-      audio.src = decoded;
-      container.innerHTML = '';
-      container.appendChild(audio);
-    }
-    // Fallback iframe
-    else{
-      const iframe = document.createElement('iframe');
-      iframe.src = decoded;
-      iframe.allowFullscreen = true;
-      container.innerHTML = '';
-      container.appendChild(iframe);
-    }
-
-  } catch(e){
-    fallback("Error loading URL.");
-    console.error(e);
-  }
+  document.getElementById('container').innerHTML = "No video URL provided. Use ?=LINK";
 }
 </script>
+
 </body>
 </html>
