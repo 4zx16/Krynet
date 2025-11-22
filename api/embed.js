@@ -15,12 +15,12 @@ function fetchJSON(url) {
 
 export default async function handler(req, res) {
   let { url } = req.query;
-  if(!url) return res.status(400).send("No URL provided.");
+  if (!url) return res.status(400).send("No URL provided.");
 
-  // Prevent recursion
-  if(url.includes("/api/embed")) {
+  // Prevent infinite recursion
+  if (url.includes("/api/embed")) {
     const match = url.match(/url=(.*)/);
-    if(match && match[1]) url = decodeURIComponent(match[1]);
+    if (match && match[1]) url = decodeURIComponent(match[1]);
     else return res.status(400).send("Cannot embed the embed endpoint itself.");
   }
 
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
   try {
     // --- YouTube ---
     const ytMatch = decodedURL.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
-    if((decodedURL.includes("youtube.com") || decodedURL.includes("youtu.be")) && ytMatch) {
+    if ((decodedURL.includes("youtube.com") || decodedURL.includes("youtu.be")) && ytMatch) {
       const id = ytMatch[1];
       embedHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}" allowfullscreen></iframe>`;
       thumb = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
@@ -41,28 +41,28 @@ export default async function handler(req, res) {
       type = "video.other";
     }
     // --- Vimeo ---
-    else if(decodedURL.includes("vimeo.com")) {
+    else if (decodedURL.includes("vimeo.com")) {
       const vimeoMatch = decodedURL.match(/vimeo.com\/(\d+)/);
       const id = vimeoMatch ? vimeoMatch[1] : null;
-      if(id) {
+      if (id) {
         embedHTML = `<iframe src="https://player.vimeo.com/video/${id}" allowfullscreen></iframe>`;
         title = `Vimeo Video ${id}`;
         type = "video.other";
       }
     }
     // --- SoundCloud ---
-    else if(decodedURL.includes("soundcloud.com")) {
+    else if (decodedURL.includes("soundcloud.com")) {
       embedHTML = `<iframe src="https://w.soundcloud.com/player/?url=${encodeURIComponent(decodedURL)}" allowfullscreen></iframe>`;
       title = "SoundCloud Track";
       type = "music.song";
     }
     // --- Direct media ---
-    else if(decodedURL.match(/\.(mp4|webm)$/i)) {
+    else if (decodedURL.match(/\.(mp4|webm)$/i)) {
       embedHTML = `<video controls src="${decodedURL}" style="max-width:90vw; max-height:80vh;"></video>`;
       title = "Video File";
       type = "video.other";
     }
-    else if(decodedURL.match(/\.(mp3|wav)$/i)) {
+    else if (decodedURL.match(/\.(mp3|wav)$/i)) {
       embedHTML = `<audio controls src="${decodedURL}" style="max-width:90vw;"></audio>`;
       title = "Audio File";
       type = "music.song";
@@ -74,28 +74,25 @@ export default async function handler(req, res) {
         const apiURL = `https://iframe.ly/api/iframely?url=${encodeURIComponent(decodedURL)}&api_key=${IFRA_KEY}`;
         const data = await fetchJSON(apiURL);
 
-        if(data.meta) {
+        // Smart detection for playable media
+        if (data.meta) {
           title = data.meta.title || title;
           type = data.meta.type || type;
         }
-        if(data.links && data.links.thumbnail) {
-          thumb = data.links.thumbnail.href;
-        }
+        if (data.links && data.links.thumbnail) thumb = data.links.thumbnail.href;
 
-        // If it's a video/audio type, embed directly
-        if(type.startsWith("video") || type.startsWith("music")) {
+        if (type.startsWith("video") || type.startsWith("music")) {
           embedHTML = data.html || `<iframe src="${decodedURL}" allowfullscreen></iframe>`;
         } else {
           embedHTML = data.html || `<iframe src="${decodedURL}" allowfullscreen></iframe>`;
         }
-
-      } catch(e) {
+      } catch (e) {
         console.error("Iframely fetch failed", e);
         embedHTML = `<iframe src="${decodedURL}" allowfullscreen></iframe>`;
       }
     }
 
-    // --- HTML output ---
+    // --- Return HTML ---
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -131,7 +128,7 @@ iframe, video, audio { max-width:90vw; max-height:80vh; border:none; border-radi
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
 
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     res.status(500).send("Error generating embed.");
   }
