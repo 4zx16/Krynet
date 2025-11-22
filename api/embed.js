@@ -1,59 +1,38 @@
-export default function handler(req, res) {
+import fetch from 'node-fetch';
+
+export default async function handler(req, res) {
   const { url } = req.query;
-  if(!url){
-    res.status(400).send("No URL provided. Use ?url=LINK");
-    return;
-  }
+  if(!url) return res.status(400).send("No URL provided.");
 
   const decodedURL = decodeURIComponent(url);
+
+  let embedHTML = "";
   let title = "Embedded Content";
   let thumb = "";
-  let embedHTML = "";
   let type = "website";
 
   try {
-    // YouTube
-    const ytMatch = decodedURL.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
-    if((decodedURL.includes("youtube.com") || decodedURL.includes("youtu.be")) && ytMatch){
-      const id = ytMatch[1];
+    // Check YouTube/Vimeo/SoundCloud/direct video first (same as before)
+    if(decodedURL.includes("youtube.com") || decodedURL.includes("youtu.be")){
+      const id = decodedURL.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/)[1];
       embedHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}" allowfullscreen></iframe>`;
       thumb = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
       title = `YouTube Video ${id}`;
       type = "video.other";
     }
-    // Vimeo
-    else if(decodedURL.includes("vimeo.com")){
-      const vimeoMatch = decodedURL.match(/vimeo.com\/(\d+)/);
-      const id = vimeoMatch ? vimeoMatch[1] : null;
-      if(id){
-        embedHTML = `<iframe src="https://player.vimeo.com/video/${id}" allowfullscreen></iframe>`;
-        title = `Vimeo Video ${id}`;
-        type = "video.other";
-      }
-    }
-    // SoundCloud
-    else if(decodedURL.includes("soundcloud.com")){
-      embedHTML = `<iframe src="https://w.soundcloud.com/player/?url=${encodeURIComponent(decodedURL)}" allowfullscreen></iframe>`;
-      title = `SoundCloud Track`;
-      type = "music.song";
-    }
-    // Direct video
-    else if(decodedURL.match(/\.(mp4|webm)$/)){
-      embedHTML = `<video controls src="${decodedURL}"></video>`;
-      title = "Video File";
-      type = "video.other";
-    }
-    // Direct audio
-    else if(decodedURL.match(/\.(mp3|wav)$/)){
-      embedHTML = `<audio controls src="${decodedURL}"></audio>`;
-      title = "Audio File";
-      type = "music.song";
-    }
-    // Generic fallback
-    else{
-      embedHTML = `<iframe src="${decodedURL}" allowfullscreen></iframe>`;
+    // Fallback to Iframely for any other site
+    else {
+      const IFRA_KEY = "f3c7705c1575176127f4ae";
+      const apiURL = `https://iframe.ly/api/iframely?url=${encodeURIComponent(decodedURL)}&api_key=${IFRA_KEY}`;
+      const data = await fetch(apiURL).then(r => r.json());
+
+      if(data.html) embedHTML = data.html;
+      if(data.meta.title) title = data.meta.title;
+      if(data.links.thumbnail) thumb = data.links.thumbnail.href;
+      type = data.meta.type || "website";
     }
 
+    // Generate HTML with OG + Twitter meta
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -68,13 +47,9 @@ export default function handler(req, res) {
 <meta property="og:image" content="${thumb}">
 <meta property="og:video" content="${decodedURL}">
 <meta property="og:video:type" content="text/html">
-<meta property="og:video:width" content="1280">
-<meta property="og:video:height" content="720">
 
 <meta name="twitter:card" content="player">
 <meta name="twitter:player" content="${decodedURL}">
-<meta name="twitter:player:width" content="1280">
-<meta name="twitter:player:height" content="720">
 <meta name="twitter:title" content="${title}">
 <meta name="twitter:description" content="Embedded via Krynet">
 <meta name="twitter:image" content="${thumb}">
