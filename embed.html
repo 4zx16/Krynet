@@ -114,9 +114,13 @@
     btn.addEventListener('click', () => createEmbed(input.value.trim()));
     input.addEventListener('keypress', (e) => { if (e.key === 'Enter') createEmbed(input.value.trim()); });
 
-    // Preload from URL param
+    // Support ?= query parameter for github.io/embed.html
     const params = new URLSearchParams(window.location.search);
-    const urlParam = params.get('url') || params.get('q') || params.get('');
+    let urlParam = params.get('url') || params.get('q') || params.get('');
+    if (!urlParam && window.location.search.startsWith('?=')) {
+      urlParam = window.location.search.slice(2);
+    }
+
     if (urlParam) createEmbed(urlParam.trim());
   </script>
 </body>
