@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KrySearch</title>
+
+  <style>
+    body {
+      font-family: Inter, Arial, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+
+    .box {
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 14px;
+      max-width: 450px;
+      box-shadow: 0px 0px 20px rgba(0,0,0,0.45);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      background: #4da6ff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #3399ff;
+    }
+
+    .loading {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <h1>KrySearch</h1>
+    <p>Enter text to search securely or a URL to open directly.</p>
+
+    <input type="text" id="searchInput" placeholder="Type your search here or enter a URL..." />
+    <button id="searchBtn">Go</button>
+
+    <div class="loading" id="loadingText"></div>
+  </div>
+
+  <script>
+    const input = document.getElementById('searchInput');
+    const btn = document.getElementById('searchBtn');
+    const loading = document.getElementById('loadingText');
+
+    function performSearchOrOpen(value) {
+      if (!value) {
+        loading.textContent = 'Please enter a search term or URL.';
+        return;
+      }
+
+      if (value.startsWith('https://')) {
+        loading.textContent = 'Opening URL...';
+        window.open(value, '_blank');
+      } else {
+        loading.textContent = 'Searching securely...';
+        const searchUrl = `https://www.startpage.com/sp/search?query=${encodeURIComponent(value)}`;
+        window.open(searchUrl, '_blank');
+      }
+    }
+
+    btn.addEventListener('click', () => performSearchOrOpen(input.value.trim()));
+    input.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearchOrOpen(input.value.trim()); });
+
+    // Detect query from URL
+    const params = new URLSearchParams(window.location.search);
+    let query = params.get('url') || params.get('q') || params.get('');
+    if (query) {
+      performSearchOrOpen(query.trim());
+    }
+  </script>
+</body>
+</html>
