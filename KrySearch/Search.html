@@ -3,23 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <!-- Privacy-safe meta -->
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="dark">
+
 <title>KrySearch</title>
+
+<!-- Hacker-style favicon -->
 <link rel="icon" href="data:image/svg+xml,
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
 <text y='70' font-size='70'>🕶️</text>
 </svg>">
+
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 <div class="box">
   <h1>KrySearch</h1>
-  <input id="q" placeholder="Search" autocomplete="off">
+  <input id="q" placeholder="Search or paste URL" autocomplete="off">
   <button id="go">Go</button>
   <div class="meta" id="status"></div>
 </div>
+
 <script src="search.js" defer></script>
 </body>
 </html>
