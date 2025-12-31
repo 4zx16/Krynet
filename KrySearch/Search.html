@@ -2,147 +2,94 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Content-Security-Policy"
+content="
+default-src 'self';
+script-src 'self';
+style-src 'self' 'unsafe-inline';
+img-src 'self' data:;
+connect-src 'none';
+font-src 'none';
+object-src 'none';
+media-src 'none';
+base-uri 'none';
+form-action 'none';
+frame-ancestors 'none';
+upgrade-insecure-requests;
+">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KrySearch</title>
 <style>
-  body {
-    font-family: Inter, Arial, sans-serif;
-    background: #0f0f0f;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-    text-align: center;
-  }
-
-  .box {
-    background: #1a1a1a;
-    padding: 40px 30px;
-    border-radius: 16px;
-    max-width: 450px;
-    width: 90%;
-    box-shadow: 0 0 25px rgba(0,0,0,0.5);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .box:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 35px rgba(0,0,0,0.6);
-  }
-
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 10px;
-  }
-
-  p {
-    font-size: 0.9rem;
-    color: #ccc;
-    margin-bottom: 20px;
-  }
-
-  input {
-    width: 100%;
-    padding: 14px;
-    border-radius: 10px;
-    border: none;
-    margin-bottom: 15px;
-    font-size: 1rem;
-    background: #222;
-    color: #fff;
-  }
-
-  input:focus {
-    outline: none;
-    box-shadow: 0 0 8px #4da6ff;
-  }
-
-  button {
-    padding: 14px 20px;
-    border-radius: 10px;
-    border: none;
-    background: #4da6ff;
-    color: #000;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-
-  button:hover {
-    background: #3399ff;
-  }
-
-  .loading {
-    margin-top: 15px;
-    font-size: 0.9rem;
-    opacity: 0.7;
-    min-height: 20px;
-    transition: opacity 0.2s ease;
-  }
+body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0a0a;color:#fff;font-family:system-ui,sans-serif}
+.box{width:100%;max-width:420px;padding:32px;border-radius:16px;background:#121212;text-align:center;box-shadow:0 0 20px rgba(0,0,0,.6)}
+input{width:100%;padding:14px;border-radius:10px;border:none;background:#1c1c1c;color:#fff;font-size:1rem;outline:none}
+button{width:100%;margin-top:14px;padding:14px;border-radius:10px;border:none;background:#4da6ff;color:#000;font-weight:800;cursor:pointer}
+button:hover{background:#3399ff}
+.meta{margin-top:12px;font-size:.75rem;opacity:.55}
 </style>
 </head>
 <body>
-
 <div class="box">
-  <h1>KrySearch</h1>
-  <p>Enter text to search securely or a URL to open directly.</p>
-  <input type="text" id="searchInput" placeholder="Type your search here or enter a URL..." />
-  <button id="searchBtn">Go</button>
-  <div class="loading" id="loadingText"></div>
+<h1>KrySearch</h1>
+<input id="q" placeholder="Search or HTTPS/.onion URL" autocomplete="off" spellcheck="false">
+<button id="go">Go</button>
+<div class="meta" id="status"></div>
 </div>
-
 <script>
-const input = document.getElementById('searchInput');
-const btn = document.getElementById('searchBtn');
-const loading = document.getElementById('loadingText');
+/* ===== STRICT PRIVACY ===== */
+for(const k of['localStorage','sessionStorage','indexedDB'])
+  try{Object.defineProperty(window,k,{value:null})}catch{}
+document.cookie.split(';').forEach(c=>document.cookie=c.replace(/^ +/,'').replace(/=.*/,'=;expires=Thu,01 Jan 1970 00:00:00 UTC;path=/'))
+if(location.protocol!=='https:'&&location.hostname!=='localhost')location.replace('https://'+location.host+location.pathname)
+if(top!==self)document.documentElement.innerHTML=''
 
-function isValidUrl(str) {
-  try {
-    new URL(str);
-    return true;
-  } catch {
-    return false;
-  }
+/* ===== TOR DETECTION ===== */
+const isTor=navigator.userAgent.includes('Tor Browser')||(navigator.platform==='Linux x86_64'&&navigator.doNotTrack==='1')
+document.getElementById('status').textContent=isTor?'Tor detected · Onion enabled':'Clear-net mode'
+
+/* ===== ENGINES ===== */
+const clearnet=[q=>`https://www.startpage.com/sp/search?query=${q}`,q=>`https://duckduckgo.com/?q=${q}&kl=wt-wt`]
+const onion=[q=>`http://startpage.onion/sp/search?query=${q}`,q=>`http://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/?q=${q}`]
+
+/* ===== FINGERPRINT DEFENSE ===== */
+const jitter=()=>new Promise(r=>setTimeout(r,Math.random()*160+80))
+const _getContext=HTMLCanvasElement.prototype.getContext
+HTMLCanvasElement.prototype.getContext=function(t){
+  const ctx=_getContext.call(this,t)
+  if(t==='2d'){const g=ctx.getImageData;ctx.getImageData=function(){
+    const d=g.apply(this,arguments)
+    for(let i=0;i<32;i++){const p=Math.floor(Math.random()*d.data.length);d.data[p]^=1}
+    return d
+  }}
+  return ctx
+}
+Object.defineProperty(document,'fonts',{value:null})
+
+/* ===== SEARCH LOGIC ===== */
+function launch(url){window.location.href=url}
+
+// Handle ?url= query automatically
+const params=new URLSearchParams(window.location.search)
+let urlParam=params.get('url')
+if(urlParam){
+  try{urlParam=decodeURIComponent(urlParam)}catch{}
+  const u=urlParam.trim()
+  if(/^https?:\/\//i.test(u)||/\.onion/i.test(u))launch(u)
 }
 
-function performSearchOrOpen(value) {
-  if (!value) {
-    loading.textContent = 'Please enter a search term or URL.';
-    return;
-  }
-
-  if (isValidUrl(value)) {
-    loading.textContent = 'Opening URL...';
-    window.open(value, '_blank');
-  } else {
-    loading.textContent = 'Searching securely...';
-    const searchUrl = `https://www.startpage.com/sp/search?query=${encodeURIComponent(value)}`;
-    window.open(searchUrl, '_blank');
-  }
-
-  // Clear input after action
-  input.value = '';
-}
-
-// Button click
-btn.addEventListener('click', () => performSearchOrOpen(input.value.trim()));
-
-// Enter key
-input.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') performSearchOrOpen(input.value.trim());
-});
-
-// Auto-detect query from URL
-const params = new URLSearchParams(window.location.search);
-const query = params.get('url') || params.get('q');
-if (query) {
-  performSearchOrOpen(query.trim());
+// Search input
+document.getElementById('go').onclick=async()=>{
+  const v=document.getElementById('q').value.trim()
+  if(!v)return
+  await jitter()
+  if(/^http:\/\//i.test(v))return
+  if(/^(https:\/\/|http:\/\/.*\.onion)/i.test(v)){launch(v);return}
+  const q=encodeURIComponent(v)
+  const engines=isTor?onion:clearnet
+  const engine=engines[Math.floor(Math.random()*engines.length)]
+  launch(engine(q))
 }
 </script>
-
 </body>
 </html>
