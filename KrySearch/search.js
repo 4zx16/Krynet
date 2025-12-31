@@ -3,33 +3,27 @@ try {
   localStorage.clear()
   sessionStorage.clear()
 } catch {}
-
 document.cookie.split(";").forEach(c => {
   document.cookie = c.replace(/^ +/, "")
     .replace(/=.*/, "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/")
 })
 
-/* ===== TOR DETECTION (PASSIVE) ===== */
-const isTor =
-  navigator.userAgent.includes("Tor Browser") ||
-  navigator.doNotTrack === "1"
-
+/* ===== PRIVACY STATUS ===== */
 const status = document.getElementById("status")
-status.textContent = isTor ? "Tor detected · onion-ready" : "Clear-net mode"
+status.textContent = "Private search mode"
 
-/* ===== SEARCH ENGINES ===== */
-const ENGINES_CLEAR = [
-  q => `https://www.startpage.com/sp/search?query=${q}`,
-  q => `https://duckduckgo.com/?q=${q}&kl=wt-wt`
-]
+/* ===== PRIVACY-FOCUSED ENGINES ===== */
+const ENGINES = {
+  startpage: q => `https://www.startpage.com/sp/search?query=${q}`,
+  duckduckgo: q => `https://duckduckgo.com/?q=${q}&kl=wt-wt`,
+  brave: q => `https://search.brave.com/search?q=${q}`,
+  mojeek: q => `https://www.mojeek.com/search?q=${q}`,
+  qwant: q => `https://www.qwant.com/?q=${q}&t=web`
+}
 
-const ENGINES_ONION = [
-  q => `http://startpage.onion/sp/search?query=${q}`,
-  q => `http://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/?q=${q}`
-]
-
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)]
+function pickEngine(name) {
+  if (name && ENGINES[name]) return ENGINES[name]
+  return ENGINES.startpage // default
 }
 
 /* ===== SAFE NAVIGATION ===== */
@@ -38,34 +32,45 @@ function navigate(url) {
 }
 
 /* ===== QUERY HANDLER ===== */
-function handleQuery(value) {
+function handleQuery(value, engineName, isUrl=false) {
   if (!value) return
-
   value = value.trim()
+  const engineFunc = pickEngine(engineName)
+  
+  if (isUrl) {
+    const q = encodeURIComponent(value)
+    navigate(engineFunc(q))
+    return
+  }
 
   if (/^http:\/\//i.test(value)) return
-  if (/^https:\/\//i.test(value) || /\.onion$/i.test(value)) {
+  if (/^https:\/\//i.test(value)) {
     navigate(value)
     return
   }
 
   const q = encodeURIComponent(value)
-  const engine = isTor ? pick(ENGINES_ONION) : pick(ENGINES_CLEAR)
-  navigate(engine(q))
+  navigate(engineFunc(q))
 }
 
-/* ===== AUTO EXEC (?url / ?q) ===== */
+/* ===== AUTO EXEC (?q=term OR ?url=site&engine=name) ===== */
 window.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(location.search)
-  let v = params.get("url") || params.get("q")
-  if (v) {
-    try { v = decodeURIComponent(v) } catch {}
-    handleQuery(v)
+  const engine = params.get("engine")
+  let query = params.get("q")
+  let urlParam = params.get("url")
+
+  if (urlParam) {
+    try { urlParam = decodeURIComponent(urlParam) } catch {}
+    handleQuery(urlParam, engine, true)
+  } else if (query) {
+    try { query = decodeURIComponent(query) } catch {}
+    handleQuery(query, engine)
   }
 })
 
 /* ===== UI ===== */
 document.getElementById("go").onclick = () => {
-  const v = document.getElementById("q").value
-  handleQuery(v)
+  const value = document.getElementById("q").value
+  handleQuery(value)
 }
