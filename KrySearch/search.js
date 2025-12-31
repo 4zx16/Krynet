@@ -53,7 +53,10 @@ document.getElementById('go').onclick = async () => {
   if(/^http:\/\//i.test(v)) return
   if(/^(https:\/\/|http:\/\/.*\.onion)/i.test(v)){ launch(v); return }
   const q = encodeURIComponent(v)
+  
+  // Choose a random engine from the list
   const engines = isTor ? onion : clearnet
+  if(!engines.length) return // fail-safe
   const engine = engines[Math.floor(Math.random()*engines.length)]
   launch(engine(q))
 }
