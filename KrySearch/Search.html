@@ -2,33 +2,30 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAnFBMVEUAAAD///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8fHx+NjY2+vr7n5+fm5ubq6ur09PTR0dG8vLyzs7PQ0NCLi4u8vLy+vr7X19e8vLxs7OzAwMBCQkIwMDA1NTU4ODgnJyclpaWxsbHc3Nzb29tGRkZpamlkZGRpaWlMTEwUFBQTExP///8MDAyzs7NPAAAAIHRSTlMAEBAgIDAwQEBAYGCgoKCwsMDQ0NDw8QEBAQEAB9Mh6lAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQY02NgQAN1YGBgYGJgYGBgYGAFQMDIyMjIyMjBCSEpKSklJSUlJSUlJSUlJSUlJSUlJSUlJQDYKIEELuYgSAAAAAElFTkSuQmCC">
-<meta http-equiv="Content-Security-Policy"
-content="
-default-src 'self';
-script-src 'self';
-style-src 'self' 'unsafe-inline';
-img-src 'self' data:;
-connect-src 'none';
-font-src 'none';
-object-src 'none';
-media-src 'none';
-base-uri 'none';
-form-action 'none';
-upgrade-insecure-requests;
-">
-<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Privacy-safe meta -->
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark">
+
 <title>KrySearch</title>
+
+<link rel="icon" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+<text y='70' font-size='70'>🕶️</text>
+</svg>">
+
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 <div class="box">
-<h1>KrySearch</h1>
-<input id="q" placeholder="Search..." autocomplete="off" spellcheck="false">
-<button id="go">Go</button>
-<div class="meta" id="status"></div>
+  <h1>KrySearch</h1>
+  <input id="q" placeholder="Search or paste HTTPS / .onion URL" autocomplete="off">
+  <button id="go">Go</button>
+  <div class="meta" id="status"></div>
 </div>
-<script src="search.js"></script>
+
+<script src="search.js" defer></script>
 </body>
 </html>
