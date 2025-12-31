@@ -10,7 +10,7 @@
     default-src 'none';
     script-src 'self';
     style-src 'self' 'unsafe-inline';
-    img-src 'self';
+    img-src 'self' data:;
     form-action
       https://searxng.org
       https://duckduckgo.com
@@ -62,8 +62,7 @@
   <h1>KrySearch</h1>
   <p>Privacy-first search by Krynet. JS optional, Tor-aware.</p>
 
-  <!-- Unified form -->
-  <form id="searchForm" method="GET" target="_blank" referrerpolicy="no-referrer" autocomplete="off">
+  <form id="searchForm" autocomplete="off">
     <select id="engine">
       <option value="searx">SearXNG</option>
       <option value="ddg">DuckDuckGo</option>
@@ -111,35 +110,52 @@
   };
 
   form.addEventListener('submit', e=>{
+    e.preventDefault();
     const val = q.value.trim();
     if(!val) return;
 
     if(isURL(val)){
-      e.preventDefault();
       window.open(val.startsWith('http')?val:'https://'+val,'_blank','noopener,noreferrer');
       return;
     }
 
-    // Engine handling
-    if(engine.value==='searx'){
-      form.action = isTor ? TOR_SEARX_ONION : 'https://searxng.org/';
-      form.method = postOnly.checked ? 'POST' : 'GET';
-      q.name = 'q';
+    let url = '';
+    let method = 'GET';
+    let name = 'q';
+
+    switch(engine.value){
+      case 'searx':
+        url = isTor ? TOR_SEARX_ONION : 'https://searxng.org/';
+        if(postOnly.checked) method='POST';
+        break;
+      case 'ddg':
+        url = isTor ? TOR_DDG_ONION : 'https://duckduckgo.com/';
+        if(postOnly.checked) method='POST';
+        break;
+      case 'startpage':
+        url = 'https://www.startpage.com/sp/search';
+        name = 'query';
+        break;
+      case 'brave':
+        url = 'https://search.brave.com/search';
+        break;
     }
-    if(engine.value==='ddg'){
-      form.action = isTor ? TOR_DDG_ONION : 'https://duckduckgo.com/';
-      form.method = postOnly.checked ? 'POST' : 'GET';
-      q.name = 'q';
-    }
-    if(engine.value==='startpage'){
-      form.action = 'https://www.startpage.com/sp/search';
-      form.method = 'GET';
-      q.name = 'query';
-    }
-    if(engine.value==='brave'){
-      form.action = 'https://search.brave.com/search';
-      form.method = 'GET';
-      q.name = 'q';
+
+    // POST submission
+    if(method==='POST'){
+      const f = document.createElement('form');
+      f.method='POST'; f.action=url; f.target='_blank';
+      const i = document.createElement('input');
+      i.type='hidden'; i.name=name; i.value=val;
+      f.appendChild(i);
+      document.body.appendChild(f);
+      f.submit();
+      f.remove();
+    } else {
+      // GET submission
+      const params = new URLSearchParams();
+      params.set(name,val);
+      window.open(url+'?'+params.toString(),'_blank','noopener,noreferrer');
     }
   });
 
@@ -149,5 +165,6 @@
   if(auto){ q.value=auto; form.dispatchEvent(new Event('submit')); }
 })();
 </script>
+
 </body>
 </html>
