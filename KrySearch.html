@@ -86,16 +86,11 @@ button:hover { background:#3399ff; }
   const sanitize = str => { const div=document.createElement('div'); div.textContent=str; return div.textContent; };
   const isURL = v => { try { v=sanitize(v); if(!/^[a-zA-Z][a-zA-Z\d+-.]*:/.test(v)) v='https://'+v; new URL(v); return true; } catch { return false; } };
 
-  // Set default value for JS-disabled fallback input
   const fallbackInput = document.getElementById('fallbackInput');
   fallbackInput.value = urlParam || query || '';
 
   const perform = val => {
     if(!val) return;
-    if(isURL(val)){
-      window.open(val.startsWith('http')?val:'https://'+val,'_blank','noopener,noreferrer');
-      return;
-    }
 
     let targetUrl='', name='q';
     switch(engine){
@@ -104,6 +99,11 @@ button:hover { background:#3399ff; }
       case 'startpage': targetUrl = 'https://www.startpage.com/sp/search'; name='query'; break;
       case 'brave': targetUrl = 'https://search.brave.com/search'; break;
       default: targetUrl='https://www.startpage.com/sp/search'; name='query';
+    }
+
+    if(isURL(val)){
+      window.open(val.startsWith('http')?val:'https://'+val,'_blank','noopener,noreferrer');
+      return;
     }
 
     if(postOnly && (engine==='searx' || engine==='ddg')){
@@ -117,11 +117,11 @@ button:hover { background:#3399ff; }
     }
   };
 
-  // Auto-run if ?q= or ?url= in URL
-  if(urlParam) perform(urlParam);
-  else if(query) perform(query);
+  // Auto-run: search query takes priority, fallback to URL
+  if(query) perform(query);
+  else if(urlParam) perform(urlParam);
 
-  // Override fallback form submit to JS handler
+  // Override fallback form submit
   const fallbackForm = document.getElementById('fallbackForm');
   fallbackForm.addEventListener('submit', e=>{
     e.preventDefault();
