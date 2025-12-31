@@ -1,18 +1,50 @@
-/* ===== ZERO STATE ===== */
+/* ===============================
+   ZERO STATE (best-effort)
+================================ */
 try {
   localStorage.clear()
   sessionStorage.clear()
 } catch {}
-document.cookie.split(";").forEach(c => {
-  document.cookie = c.replace(/^ +/, "")
-    .replace(/=.*/, "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/")
+
+try {
+  document.cookie.split(";").forEach(c => {
+    document.cookie = c
+      .replace(/^ +/, "")
+      .replace(/=.*/, "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/")
+  })
+} catch {}
+
+/* ===============================
+   PLUGIN CORE (STATIC + SAFE)
+================================ */
+window.KRY_PLUGINS ||= []
+
+const KRY_CONTEXT = Object.freeze({
+  ua: navigator.userAgent,
+  lang: navigator.language,
+  platform: navigator.platform,
+  url: location.href
 })
 
-/* ===== PRIVACY STATUS ===== */
-const status = document.getElementById("status")
-status.textContent = "Private search mode"
+function runPlugins() {
+  for (const plugin of window.KRY_PLUGINS) {
+    try {
+      if (plugin?.run) plugin.run(KRY_CONTEXT)
+    } catch {
+      // silent by design
+    }
+  }
+}
 
-/* ===== PRIVACY-FOCUSED ENGINES ===== */
+/* ===============================
+   UI STATUS
+================================ */
+const status = document.getElementById("status")
+if (status) status.textContent = "Private search mode"
+
+/* ===============================
+   PRIVACY ENGINES ONLY
+================================ */
 const ENGINES = {
   startpage: q => `https://www.startpage.com/sp/search?query=${q}`,
   duckduckgo: q => `https://duckduckgo.com/?q=${q}&kl=wt-wt`,
@@ -22,55 +54,66 @@ const ENGINES = {
 }
 
 function pickEngine(name) {
-  if (name && ENGINES[name]) return ENGINES[name]
-  return ENGINES.startpage // default
+  return ENGINES[name] || ENGINES.startpage
 }
 
-/* ===== SAFE NAVIGATION ===== */
+/* ===============================
+   SAFE NAVIGATION
+================================ */
 function navigate(url) {
   window.location.assign(url)
 }
 
-/* ===== QUERY HANDLER ===== */
-function handleQuery(value, engineName, isUrl=false) {
+/* ===============================
+   QUERY HANDLER
+================================ */
+function handleQuery(value, engineName, isUrl = false) {
   if (!value) return
   value = value.trim()
-  const engineFunc = pickEngine(engineName)
-  
-  if (isUrl) {
-    const q = encodeURIComponent(value)
-    navigate(engineFunc(q))
-    return
-  }
 
+  const engine = pickEngine(engineName)
+
+  // hard block http
   if (/^http:\/\//i.test(value)) return
-  if (/^https:\/\//i.test(value)) {
+
+  // direct https
+  if (!isUrl && /^https:\/\//i.test(value)) {
     navigate(value)
     return
   }
 
   const q = encodeURIComponent(value)
-  navigate(engineFunc(q))
+  navigate(engine(q))
 }
 
-/* ===== AUTO EXEC (?q=term OR ?url=site&engine=name) ===== */
+/* ===============================
+   AUTO EXEC (?q= OR ?url=)
+================================ */
 window.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(location.search)
   const engine = params.get("engine")
-  let query = params.get("q")
-  let urlParam = params.get("url")
 
-  if (urlParam) {
-    try { urlParam = decodeURIComponent(urlParam) } catch {}
-    handleQuery(urlParam, engine, true)
-  } else if (query) {
-    try { query = decodeURIComponent(query) } catch {}
-    handleQuery(query, engine)
+  let q = params.get("q")
+  let url = params.get("url")
+
+  if (url) {
+    try { url = decodeURIComponent(url) } catch {}
+    handleQuery(url, engine, true)
+  } else if (q) {
+    try { q = decodeURIComponent(q) } catch {}
+    handleQuery(q, engine)
   }
+
+  runPlugins()
 })
 
-/* ===== UI ===== */
-document.getElementById("go").onclick = () => {
-  const value = document.getElementById("q").value
-  handleQuery(value)
+/* ===============================
+   UI BINDINGS
+================================ */
+const goBtn = document.getElementById("go")
+if (goBtn) {
+  goBtn.onclick = () => {
+    const value = document.getElementById("q")?.value
+    handleQuery(value)
+  }
 }
