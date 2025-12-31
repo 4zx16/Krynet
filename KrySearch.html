@@ -84,48 +84,62 @@ button:hover { background:#3399ff; }
   const isTor = navigator.userAgent.includes('Tor');
 
   const sanitize = str => { const div=document.createElement('div'); div.textContent=str; return div.textContent; };
-  const isURL = v => { try { v=sanitize(v); if(!/^[a-zA-Z][a-zA-Z\d+-.]*:/.test(v)) v='https://'+v; new URL(v); return true; } catch { return false; } };
-
   const fallbackInput = document.getElementById('fallbackInput');
-  fallbackInput.value = urlParam || query || '';
+  fallbackInput.value = query || urlParam || '';
 
-  const perform = val => {
-    if(!val) return;
-
-    let targetUrl='', name='q';
+  const getEngineURL = () => {
     switch(engine){
-      case 'searx': targetUrl = isTor?TOR_SEARX_ONION:'https://searxng.org/'; break;
-      case 'ddg': targetUrl = isTor?TOR_DDG_ONION:'https://duckduckgo.com/'; break;
-      case 'startpage': targetUrl = 'https://www.startpage.com/sp/search'; name='query'; break;
-      case 'brave': targetUrl = 'https://search.brave.com/search'; break;
-      default: targetUrl='https://www.startpage.com/sp/search'; name='query';
-    }
-
-    if(isURL(val)){
-      window.open(val.startsWith('http')?val:'https://'+val,'_blank','noopener,noreferrer');
-      return;
-    }
-
-    if(postOnly && (engine==='searx' || engine==='ddg')){
-      const f = document.createElement('form');
-      f.method='POST'; f.action=targetUrl; f.target='_blank';
-      const i = document.createElement('input'); i.type='hidden'; i.name=name; i.value=sanitize(val);
-      f.appendChild(i); document.body.appendChild(f); f.submit(); f.remove();
-    } else {
-      const params = new URLSearchParams(); params.set(name,sanitize(val));
-      window.open(targetUrl+'?'+params.toString(),'_blank','noopener,noreferrer');
+      case 'searx': return isTor ? TOR_SEARX_ONION : 'https://searxng.org/';
+      case 'ddg': return isTor ? TOR_DDG_ONION : 'https://duckduckgo.com/';
+      case 'brave': return 'https://search.brave.com/search';
+      case 'startpage': 
+      default: return 'https://www.startpage.com/sp/search';
     }
   };
 
-  // Auto-run: search query takes priority, fallback to URL
-  if(query) perform(query);
-  else if(urlParam) perform(urlParam);
+  const getQueryParamName = () => {
+    switch(engine){
+      case 'startpage': return 'query';
+      case 'searx':
+      case 'ddg':
+      case 'brave': return 'q';
+      default: return 'q';
+    }
+  };
 
-  // Override fallback form submit
+  const performSearch = val => {
+    if(!val) return;
+    const baseURL = getEngineURL();
+    const paramName = getQueryParamName();
+    const paramsObj = new URLSearchParams();
+    paramsObj.set(paramName, sanitize(val));
+
+    if(postOnly && (engine==='searx' || engine==='ddg')){
+      const f = document.createElement('form');
+      f.method = 'POST';
+      f.action = baseURL;
+      f.target = '_blank';
+      const i = document.createElement('input');
+      i.type = 'hidden';
+      i.name = paramName;
+      i.value = sanitize(val);
+      f.appendChild(i);
+      document.body.appendChild(f);
+      f.submit();
+      f.remove();
+    } else {
+      window.open(baseURL + '?' + paramsObj.toString(), '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  // Auto-run search if query or URL present
+  if(query) performSearch(query);
+  else if(urlParam) performSearch(urlParam);
+
   const fallbackForm = document.getElementById('fallbackForm');
-  fallbackForm.addEventListener('submit', e=>{
+  fallbackForm.addEventListener('submit', e => {
     e.preventDefault();
-    perform(fallbackInput.value);
+    performSearch(fallbackInput.value);
   });
 })();
 </script>
