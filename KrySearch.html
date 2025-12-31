@@ -18,75 +18,77 @@ button:hover { background:#3399ff; }
 </style>
 </head>
 <body>
-
 <div class="box">
-  <h1>KrySearch</h1>
-  <p>Privacy-first search by Krynet. JS optional, Tor-aware.</p>
-
-  <form id="fallbackForm" action="https://www.startpage.com/sp/search" method="get" autocomplete="off">
-    <input id="searchInput" name="query" type="text" placeholder="Search or enter a URL…" required>
-    <button type="submit">Go</button>
-  </form>
-
-  <div class="note">Privacy-maximized · JS optional · Onion-aware · Krynet Edition</div>
+<h1>KrySearch</h1>
+<p>Privacy-first search by Krynet. JS optional, Tor-aware.</p>
+<form id="searchForm" action="https://www.startpage.com/sp/search" method="get" autocomplete="off">
+  <input id="searchInput" name="query" type="text" placeholder="Search or enter a URL…" required>
+  <button type="submit">Go</button>
+</form>
+<div class="note">Privacy-maximized · JS optional · Onion-aware · Krynet Edition</div>
 </div>
 
 <script>
 window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const engine = (params.get('engine')||'startpage').toLowerCase();
-  const query = params.get('q');
-  const urlParam = params.get('url');
-  const postOnly = params.get('post') === '1';
+  const q = params.get('q');
+  const url = params.get('url');
+  const postOnly = params.get('post')==='1';
   const inputEl = document.getElementById('searchInput');
-  const form = document.getElementById('fallbackForm');
 
   const TOR_DDG_ONION = 'http://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/';
   const TOR_SEARX_ONION = 'http://searxngf7j4f.onion/';
   const isTor = navigator.userAgent.includes('Tor');
 
   const sanitize = str => { const d=document.createElement('div'); d.textContent=str; return d.textContent; };
-  inputEl.value = query || urlParam || '';
+  inputEl.value = q || url || '';
 
   const getEngineURL = () => {
     switch(engine){
-      case 'searx': return isTor?TOR_SEARX_ONION:'https://searxng.org/';
-      case 'ddg': return isTor?TOR_DDG_ONION:'https://duckduckgo.com/';
+      case 'searx': return isTor ? TOR_SEARX_ONION : 'https://searxng.org/';
+      case 'ddg': return isTor ? TOR_DDG_ONION : 'https://duckduckgo.com/';
       case 'brave': return 'https://search.brave.com/search';
       case 'startpage':
       default: return 'https://www.startpage.com/sp/search';
     }
   };
+
   const getQueryName = () => engine==='startpage'?'query':'q';
 
-  const performSearch = val => {
+  const perform = val => {
     if(!val) return;
     const base = getEngineURL();
     const paramName = getQueryName();
-    const paramsObj = new URLSearchParams();
-    paramsObj.set(paramName, sanitize(val));
+    const sanitized = sanitize(val);
 
+    // Use POST for SearXNG/DDG if requested
     if(postOnly && (engine==='searx'||engine==='ddg')){
       const f = document.createElement('form');
       f.method='POST'; f.action=base; f.target='_blank';
       const i = document.createElement('input');
-      i.type='hidden'; i.name=paramName; i.value=sanitize(val);
-      f.appendChild(i); document.body.appendChild(f); f.submit(); f.remove();
+      i.type='hidden'; i.name=paramName; i.value=sanitized;
+      f.appendChild(i);
+      document.body.appendChild(f);
+      f.submit();
+      f.remove();
     } else {
-      window.open(base+'?'+paramsObj.toString(),'_blank','noopener,noreferrer');
+      const paramsObj = new URLSearchParams();
+      paramsObj.set(paramName, sanitized);
+      window.open(base+'?'+paramsObj.toString(), '_blank','noopener,noreferrer');
     }
   };
 
-  // Both query and url now go through engine
-  if(query) performSearch(query);
-  else if(urlParam) performSearch(urlParam);
+  // Auto-run on page load
+  if(q) perform(q);
+  else if(url) perform(url);
 
-  form.addEventListener('submit', e=>{
+  // Manual fallback
+  document.getElementById('searchForm').addEventListener('submit', e=>{
     e.preventDefault();
-    performSearch(inputEl.value);
+    perform(inputEl.value.trim());
   });
 });
 </script>
-
 </body>
 </html>
