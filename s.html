@@ -2,84 +2,86 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>KrySearch – Krynet Edition</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KrySearch</title>
+
+<!-- Referrer & Privacy -->
 <meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  script-src 'self';
+  style-src 'self' 'unsafe-inline';
+  connect-src https://www.startpage.com;
+  img-src 'self';
+  font-src 'self';
+  frame-ancestors 'none';
+  base-uri 'self';
+">
+
 <style>
 body { font-family: Inter, Arial, sans-serif; background:#0f0f0f; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; text-align:center;}
 .box { background:#1a1a1a; padding:30px; border-radius:14px; max-width:450px; box-shadow:0 0 20px rgba(0,0,0,0.45);}
 h1 { font-size:1.8rem; margin-bottom:10px;}
-input { width:100%; padding:12px; border-radius:8px; border:none; margin-bottom:15px; font-size:1rem;}
+input { width:100%; padding:12px; border-radius:8px; border:none; margin-bottom:15px; font-size:1rem; background:#0b0b0b; color:#fff;}
 button { padding:12px 20px; border-radius:8px; border:none; background:#4da6ff; color:#000; font-weight:bold; cursor:pointer;}
 button:hover { background:#3399ff;}
 .loading { margin-top:15px; font-size:0.9rem; opacity:0.7;}
 </style>
 </head>
 <body>
+
 <div class="box">
 <h1>KrySearch</h1>
-<p>Enter text to search securely or a URL to open via your selected engine.</p>
-<input type="text" id="searchInput" placeholder="Type your search here or enter a URL..." />
+<p>Search securely or open a URL directly. Privacy-maximized.</p>
+<input type="text" id="searchInput" placeholder="Type your search or a URL..." />
 <button id="searchBtn">Go</button>
 <div class="loading" id="loadingText"></div>
 </div>
 
 <script>
-const input = document.getElementById('searchInput');
-const btn = document.getElementById('searchBtn');
-const loading = document.getElementById('loadingText');
+(() => {
+  const input = document.getElementById('searchInput');
+  const btn = document.getElementById('searchBtn');
+  const loading = document.getElementById('loadingText');
 
-const TOR_DDG_ONION = 'http://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/';
-const TOR_SEARX_ONION = 'http://searxngf7j4f.onion/';
-const isTor = navigator.userAgent.includes('Tor');
+  // Minimal sanitizer to prevent XSS
+  const sanitize = str => {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.textContent;
+  };
 
-function sanitize(str){ const d=document.createElement('div'); d.textContent=str; return d.textContent; }
+  function performSearchOrOpen(value){
+    if(!value){
+      loading.textContent='Please enter a search term or URL.';
+      return;
+    }
+    const sanitized = sanitize(value);
 
-function getEngineURL(engine){
-  switch((engine||'startpage').toLowerCase()){
-    case 'ddg': return isTor ? TOR_DDG_ONION : 'https://duckduckgo.com/';
-    case 'searx': return isTor ? TOR_SEARX_ONION : 'https://searxng.org/';
-    case 'brave': return 'https://search.brave.com/search';
-    case 'startpage':
-    default: return 'https://www.startpage.com/sp/search';
+    if(sanitized.startsWith('http://') || sanitized.startsWith('https://')){
+      loading.textContent='Opening URL...';
+      window.open(sanitized,'_blank','noopener,noreferrer');
+    } else {
+      loading.textContent='Searching securely...';
+      const searchUrl = `https://www.startpage.com/sp/search?query=${encodeURIComponent(sanitized)}`;
+      window.open(searchUrl,'_blank','noopener,noreferrer');
+    }
   }
-}
 
-function getParamName(engine){ return engine==='startpage'?'query':'q'; }
+  // Button + Enter
+  btn.addEventListener('click', ()=>performSearchOrOpen(input.value.trim()));
+  input.addEventListener('keypress', e=>{ if(e.key==='Enter') performSearchOrOpen(input.value.trim()); });
 
-function performSearchOrOpen(value, engine, post=false){
-  if(!value){ loading.textContent='Please enter a search term or URL.'; return; }
-  const sanitized = sanitize(value);
-  const base = getEngineURL(engine);
-  const paramName = getParamName(engine);
-
-  if(post && (engine==='searx'||engine==='ddg')){
-    const f = document.createElement('form');
-    f.method='POST'; f.action=base; f.target='_blank';
-    const i = document.createElement('input'); i.type='hidden'; i.name=paramName; i.value=sanitized;
-    f.appendChild(i); document.body.appendChild(f); f.submit(); f.remove();
-    loading.textContent='Searching securely via POST...';
-  } else {
-    const params = new URLSearchParams();
-    params.set(paramName,sanitized);
-    if(value.startsWith('http://') || value.startsWith('https://')) loading.textContent='Opening URL via engine...';
-    else loading.textContent='Searching securely...';
-    window.open(base+'?'+params.toString(),'_blank','noopener,noreferrer');
+  // Auto-run ?q= or ?url=
+  const params = new URLSearchParams(window.location.search);
+  const query = params.get('q') || params.get('url');
+  if(query){
+    input.value = sanitize(query.trim());
+    performSearchOrOpen(input.value);
   }
-}
-
-// Button + Enter key
-btn.addEventListener('click',()=>performSearchOrOpen(input.value.trim(), new URLSearchParams(window.location.search).get('engine'), new URLSearchParams(window.location.search).get('post')==='1'));
-input.addEventListener('keypress',e=>{ if(e.key==='Enter') performSearchOrOpen(input.value.trim(), new URLSearchParams(window.location.search).get('engine'), new URLSearchParams(window.location.search).get('post')==='1'); });
-
-// Auto-run if ?q or ?url present
-const params = new URLSearchParams(window.location.search);
-const q = params.get('q');
-const url = params.get('url');
-const engine = (params.get('engine')||'startpage').toLowerCase();
-const post = params.get('post')==='1';
-if(q) performSearchOrOpen(q, engine, post);
-else if(url) performSearchOrOpen(url, engine, post);
+})();
 </script>
+
 </body>
 </html>
