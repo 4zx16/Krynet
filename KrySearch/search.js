@@ -15,7 +15,7 @@ try {
 } catch {}
 
 /* ===============================
-   PLUGIN CORE (STATIC + SAFE)
+   PLUGIN REGISTRY & EXECUTOR
 ================================ */
 window.KRY_PLUGINS ||= []
 
@@ -27,12 +27,12 @@ const KRY_CONTEXT = Object.freeze({
 })
 
 function runPlugins() {
-  for (const plugin of window.KRY_PLUGINS) {
+  const plugins = [...window.KRY_PLUGINS]
+  plugins.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  for (const plugin of plugins) {
     try {
-      if (plugin?.run) plugin.run(KRY_CONTEXT)
-    } catch {
-      // silent by design
-    }
+      plugin.run?.(KRY_CONTEXT)
+    } catch {}
   }
 }
 
@@ -43,7 +43,7 @@ const status = document.getElementById("status")
 if (status) status.textContent = "Private search mode"
 
 /* ===============================
-   PRIVACY ENGINES ONLY
+   PRIVACY-FOCUSED ENGINES
 ================================ */
 const ENGINES = {
   startpage: q => `https://www.startpage.com/sp/search?query=${q}`,
@@ -104,6 +104,7 @@ window.addEventListener("DOMContentLoaded", () => {
     handleQuery(q, engine)
   }
 
+  // run all trusted plugins once
   runPlugins()
 })
 
