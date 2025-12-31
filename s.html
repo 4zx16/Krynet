@@ -41,7 +41,6 @@ button:hover { background:#3399ff;}
 
   const sanitize = s => { const d=document.createElement('div'); d.textContent=s; return d.textContent; };
 
-  // App scheme map
   const appMap = [
     { test: /youtube\.com/, app: url => 'youtube://'+url.split('youtube.com/')[1], web: url => url },
     { test: /open\.spotify\.com/, app: url => 'spotify://'+url.split('open.spotify.com/')[1], web: url => url },
@@ -59,7 +58,6 @@ button:hover { background:#3399ff;}
     { test: /linkedin\.com/, app: url => 'linkedin://'+url.split('linkedin.com/')[1], web: url => url },
     { test: /pinterest\.com/, app: url => 'pinterest://'+url.split('pinterest.com/')[1], web: url => url },
     { test: /skype:\/\//, app: url => url, web: url => url },
-    // Add more here if needed...
   ];
 
   function tryNative(url) {
