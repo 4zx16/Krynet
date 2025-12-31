@@ -3,49 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>KrySearch – Krynet Edition</title>
-
-<meta http-equiv="Content-Security-Policy"
-  content="
-    default-src 'none';
-    script-src 'self';
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' data:;
-    form-action
-      https://searxng.org
-      https://duckduckgo.com
-      https://www.startpage.com
-      https://search.brave.com
-      http://searxngf7j4f.onion
-      http://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion;
-    base-uri 'none';
-    frame-ancestors 'none';
-    object-src 'none';
-  ">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="Permissions-Policy"
-  content="
-    geolocation=(),
-    camera=(),
-    microphone=(),
-    payment=(),
-    usb=(),
-    bluetooth=(),
-    accelerometer=(),
-    gyroscope=()
-  ">
-<meta http-equiv="x-dns-prefetch-control" content="off">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="referrer" content="no-referrer">
 <style>
-body {
-  margin:0; height:100vh;
-  display:flex; justify-content:center; align-items:center;
-  background:#0d0d0d; color:#fff; font-family:system-ui,sans-serif;
-}
-.box {
-  background:#161616; padding:32px; border-radius:16px; max-width:480px; width:100%; text-align:center;
-  box-shadow:0 20px 50px rgba(0,0,0,0.6);
-}
+body { margin:0; height:100vh; display:flex; justify-content:center; align-items:center; background:#0d0d0d; color:#fff; font-family:system-ui,sans-serif;}
+.box { background:#161616; padding:32px; border-radius:16px; max-width:480px; width:100%; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.6);}
 h1 { margin:0 0 12px; font-size:1.8rem; color:#4da6ff; }
 p { margin:0 0 18px; font-size:.95rem; opacity:.8; }
 input, button { width:100%; padding:12px; margin-bottom:14px; border-radius:10px; border:none; font-size:1rem; }
@@ -61,10 +23,8 @@ button:hover { background:#3399ff; }
   <h1>KrySearch</h1>
   <p>Privacy-first search by Krynet. JS optional, Tor-aware.</p>
 
-  <!-- Fallback HTML form for JS-disabled users -->
-  <form id="fallbackForm" action="https://www.startpage.com/sp/search" method="get" autocomplete="off" referrerpolicy="no-referrer">
-    <input id="fallbackInput" name="query" type="text" placeholder="Search or enter a URL…" required
-      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <form id="fallbackForm" action="https://www.startpage.com/sp/search" method="get" autocomplete="off">
+    <input id="searchInput" name="query" type="text" placeholder="Search or enter a URL…" required>
     <button type="submit">Go</button>
   </form>
 
@@ -72,76 +32,60 @@ button:hover { background:#3399ff; }
 </div>
 
 <script>
-(function(){
+window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const engine = (params.get('engine')||'startpage').toLowerCase();
-  const query = params.get('q')||'';
-  const urlParam = params.get('url')||'';
-  const postOnly = params.get('post')==='1';
+  const query = params.get('q');
+  const urlParam = params.get('url');
+  const postOnly = params.get('post') === '1';
+  const inputEl = document.getElementById('searchInput');
+  const form = document.getElementById('fallbackForm');
 
   const TOR_DDG_ONION = 'http://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/';
   const TOR_SEARX_ONION = 'http://searxngf7j4f.onion/';
   const isTor = navigator.userAgent.includes('Tor');
 
-  const sanitize = str => { const div=document.createElement('div'); div.textContent=str; return div.textContent; };
-  const fallbackInput = document.getElementById('fallbackInput');
-  fallbackInput.value = query || urlParam || '';
+  const sanitize = str => { const d=document.createElement('div'); d.textContent=str; return d.textContent; };
+  inputEl.value = query || urlParam || '';
 
   const getEngineURL = () => {
     switch(engine){
-      case 'searx': return isTor ? TOR_SEARX_ONION : 'https://searxng.org/';
-      case 'ddg': return isTor ? TOR_DDG_ONION : 'https://duckduckgo.com/';
+      case 'searx': return isTor?TOR_SEARX_ONION:'https://searxng.org/';
+      case 'ddg': return isTor?TOR_DDG_ONION:'https://duckduckgo.com/';
       case 'brave': return 'https://search.brave.com/search';
-      case 'startpage': 
+      case 'startpage':
       default: return 'https://www.startpage.com/sp/search';
     }
   };
-
-  const getQueryParamName = () => {
-    switch(engine){
-      case 'startpage': return 'query';
-      case 'searx':
-      case 'ddg':
-      case 'brave': return 'q';
-      default: return 'q';
-    }
-  };
+  const getQueryName = () => engine==='startpage'?'query':'q';
 
   const performSearch = val => {
     if(!val) return;
-    const baseURL = getEngineURL();
-    const paramName = getQueryParamName();
+    const base = getEngineURL();
+    const paramName = getQueryName();
     const paramsObj = new URLSearchParams();
     paramsObj.set(paramName, sanitize(val));
 
-    if(postOnly && (engine==='searx' || engine==='ddg')){
+    if(postOnly && (engine==='searx'||engine==='ddg')){
       const f = document.createElement('form');
-      f.method = 'POST';
-      f.action = baseURL;
-      f.target = '_blank';
+      f.method='POST'; f.action=base; f.target='_blank';
       const i = document.createElement('input');
-      i.type = 'hidden';
-      i.name = paramName;
-      i.value = sanitize(val);
-      f.appendChild(i);
-      document.body.appendChild(f);
-      f.submit();
-      f.remove();
+      i.type='hidden'; i.name=paramName; i.value=sanitize(val);
+      f.appendChild(i); document.body.appendChild(f); f.submit(); f.remove();
     } else {
-      window.open(baseURL + '?' + paramsObj.toString(), '_blank', 'noopener,noreferrer');
+      window.open(base+'?'+paramsObj.toString(),'_blank','noopener,noreferrer');
     }
   };
 
-  // Auto-run search if query or URL present
+  // Both query and url now go through engine
   if(query) performSearch(query);
   else if(urlParam) performSearch(urlParam);
 
-  const fallbackForm = document.getElementById('fallbackForm');
-  fallbackForm.addEventListener('submit', e => {
+  form.addEventListener('submit', e=>{
     e.preventDefault();
-    performSearch(fallbackInput.value);
+    performSearch(inputEl.value);
   });
-})();
+});
 </script>
 
 </body>
