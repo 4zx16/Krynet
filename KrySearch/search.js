@@ -1,5 +1,5 @@
 /* ===============================
-   ZERO STATE (best-effort)
+   ZERO STATE (best‑effort)
 ================================ */
 try {
   localStorage.clear()
@@ -32,7 +32,9 @@ function runPlugins() {
   for (const plugin of plugins) {
     try {
       plugin.run?.(KRY_CONTEXT)
-    } catch {}
+    } catch {
+      // silent by design
+    }
   }
 }
 
@@ -43,7 +45,7 @@ const status = document.getElementById("status")
 if (status) status.textContent = "Private search mode"
 
 /* ===============================
-   PRIVACY-FOCUSED ENGINES
+   PRIVACY‑FOCUSED ENGINES
 ================================ */
 const ENGINES = {
   startpage: q => `https://www.startpage.com/sp/search?query=${q}`,
@@ -58,10 +60,14 @@ function pickEngine(name) {
 }
 
 /* ===============================
-   SAFE NAVIGATION
+   HARDENED NAVIGATION (FINAL)
 ================================ */
 function navigate(url) {
-  window.location.assign(url)
+  if (window.__KRY_HARD_NAV__) {
+    window.__KRY_HARD_NAV__(url)
+  } else {
+    location.assign(url)
+  }
 }
 
 /* ===============================
@@ -73,10 +79,10 @@ function handleQuery(value, engineName, isUrl = false) {
 
   const engine = pickEngine(engineName)
 
-  // hard block http
+  // block insecure transport
   if (/^http:\/\//i.test(value)) return
 
-  // direct https
+  // direct HTTPS navigation
   if (!isUrl && /^https:\/\//i.test(value)) {
     navigate(value)
     return
@@ -90,6 +96,9 @@ function handleQuery(value, engineName, isUrl = false) {
    AUTO EXEC (?q= OR ?url=)
 ================================ */
 window.addEventListener("DOMContentLoaded", () => {
+  // plugins FIRST so navigation is hardened
+  runPlugins()
+
   const params = new URLSearchParams(location.search)
   const engine = params.get("engine")
 
@@ -103,9 +112,6 @@ window.addEventListener("DOMContentLoaded", () => {
     try { q = decodeURIComponent(q) } catch {}
     handleQuery(q, engine)
   }
-
-  // run all trusted plugins once
-  runPlugins()
 })
 
 /* ===============================
