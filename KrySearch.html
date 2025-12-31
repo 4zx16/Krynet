@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>KrySearch – Krynet Edition</title>
 
-<!-- CSP for GitHub Pages -->
 <meta http-equiv="Content-Security-Policy"
   content="
     default-src 'none';
@@ -38,22 +37,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  body {
-    margin:0; height:100vh;
-    display:flex; justify-content:center; align-items:center;
-    background:#0d0d0d; color:#fff; font-family:system-ui,sans-serif;
-  }
-  .box {
-    background:#161616; padding:32px; border-radius:16px; max-width:480px; width:100%; text-align:center;
-    box-shadow:0 20px 50px rgba(0,0,0,0.6);
-  }
-  h1 { margin:0 0 12px; font-size:1.8rem; color:#4da6ff; }
-  p { margin:0 0 18px; font-size:.95rem; opacity:.8; }
-  select, input, button { width:100%; padding:12px; margin-bottom:14px; border-radius:10px; border:none; font-size:1rem; }
-  input, select { background:#0b0b0b; color:#fff; }
-  button { background:#4da6ff; color:#000; font-weight:700; cursor:pointer; }
-  button:hover { background:#3399ff; }
-  .note { font-size:.8rem; opacity:.6; }
+body {
+  margin:0; height:100vh;
+  display:flex; justify-content:center; align-items:center;
+  background:#0d0d0d; color:#fff; font-family:system-ui,sans-serif;
+}
+.box {
+  background:#161616; padding:32px; border-radius:16px; max-width:480px; width:100%; text-align:center;
+  box-shadow:0 20px 50px rgba(0,0,0,0.6);
+}
+h1 { margin:0 0 12px; font-size:1.8rem; color:#4da6ff; }
+p { margin:0 0 18px; font-size:.95rem; opacity:.8; }
+input, button { width:100%; padding:12px; margin-bottom:14px; border-radius:10px; border:none; font-size:1rem; }
+input { background:#0b0b0b; color:#fff; }
+button { background:#4da6ff; color:#000; font-weight:700; cursor:pointer; }
+button:hover { background:#3399ff; }
+.note { font-size:.8rem; opacity:.6; }
 </style>
 </head>
 <body>
@@ -62,19 +61,10 @@
   <h1>KrySearch</h1>
   <p>Privacy-first search by Krynet. JS optional, Tor-aware.</p>
 
-  <form id="searchForm" autocomplete="off">
-    <select id="engine">
-      <option value="searx">SearXNG</option>
-      <option value="ddg">DuckDuckGo</option>
-      <option value="startpage">Startpage</option>
-      <option value="brave">Brave</option>
-    </select>
-
-    <input id="q" type="text" placeholder="Search or enter a URL…" required
+  <!-- Fallback HTML form for JS-disabled users -->
+  <form id="fallbackForm" action="https://www.startpage.com/sp/search" method="get" autocomplete="off" referrerpolicy="no-referrer">
+    <input id="fallbackInput" name="query" type="text" placeholder="Search or enter a URL…" required
       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-
-    <label><input type="checkbox" id="postOnly"> POST-only (DuckDuckGo/SearXNG)</label>
-
     <button type="submit">Go</button>
   </form>
 
@@ -83,86 +73,60 @@
 
 <script>
 (function(){
-  const form = document.getElementById('searchForm');
-  const q = document.getElementById('q');
-  const engine = document.getElementById('engine');
-  const postOnly = document.getElementById('postOnly');
+  const params = new URLSearchParams(window.location.search);
+  const engine = (params.get('engine')||'startpage').toLowerCase();
+  const query = params.get('q')||'';
+  const urlParam = params.get('url')||'';
+  const postOnly = params.get('post')==='1';
 
   const TOR_DDG_ONION = 'http://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/';
   const TOR_SEARX_ONION = 'http://searxngf7j4f.onion/';
-
   const isTor = navigator.userAgent.includes('Tor');
 
-  // Hardened URL sanitizer
-  const sanitize = str => {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.textContent;
-  };
+  const sanitize = str => { const div=document.createElement('div'); div.textContent=str; return div.textContent; };
+  const isURL = v => { try { v=sanitize(v); if(!/^[a-zA-Z][a-zA-Z\d+-.]*:/.test(v)) v='https://'+v; new URL(v); return true; } catch { return false; } };
 
-  const isURL = v => {
-    try {
-      v = sanitize(v);
-      if(!/^[a-zA-Z][a-zA-Z\d+-.]*:/.test(v)) v='https://'+v;
-      new URL(v);
-      return true;
-    } catch { return false; }
-  };
+  // Set default value for JS-disabled fallback input
+  const fallbackInput = document.getElementById('fallbackInput');
+  fallbackInput.value = urlParam || query || '';
 
-  form.addEventListener('submit', e=>{
-    e.preventDefault();
-    const val = q.value.trim();
+  const perform = val => {
     if(!val) return;
-
     if(isURL(val)){
       window.open(val.startsWith('http')?val:'https://'+val,'_blank','noopener,noreferrer');
       return;
     }
 
-    let url = '';
-    let method = 'GET';
-    let name = 'q';
-
-    switch(engine.value){
-      case 'searx':
-        url = isTor ? TOR_SEARX_ONION : 'https://searxng.org/';
-        if(postOnly.checked) method='POST';
-        break;
-      case 'ddg':
-        url = isTor ? TOR_DDG_ONION : 'https://duckduckgo.com/';
-        if(postOnly.checked) method='POST';
-        break;
-      case 'startpage':
-        url = 'https://www.startpage.com/sp/search';
-        name = 'query';
-        break;
-      case 'brave':
-        url = 'https://search.brave.com/search';
-        break;
+    let targetUrl='', name='q';
+    switch(engine){
+      case 'searx': targetUrl = isTor?TOR_SEARX_ONION:'https://searxng.org/'; break;
+      case 'ddg': targetUrl = isTor?TOR_DDG_ONION:'https://duckduckgo.com/'; break;
+      case 'startpage': targetUrl = 'https://www.startpage.com/sp/search'; name='query'; break;
+      case 'brave': targetUrl = 'https://search.brave.com/search'; break;
+      default: targetUrl='https://www.startpage.com/sp/search'; name='query';
     }
 
-    // POST submission
-    if(method==='POST'){
+    if(postOnly && (engine==='searx' || engine==='ddg')){
       const f = document.createElement('form');
-      f.method='POST'; f.action=url; f.target='_blank';
-      const i = document.createElement('input');
-      i.type='hidden'; i.name=name; i.value=val;
-      f.appendChild(i);
-      document.body.appendChild(f);
-      f.submit();
-      f.remove();
+      f.method='POST'; f.action=targetUrl; f.target='_blank';
+      const i = document.createElement('input'); i.type='hidden'; i.name=name; i.value=sanitize(val);
+      f.appendChild(i); document.body.appendChild(f); f.submit(); f.remove();
     } else {
-      // GET submission
-      const params = new URLSearchParams();
-      params.set(name,val);
-      window.open(url+'?'+params.toString(),'_blank','noopener,noreferrer');
+      const params = new URLSearchParams(); params.set(name,sanitize(val));
+      window.open(targetUrl+'?'+params.toString(),'_blank','noopener,noreferrer');
     }
-  });
+  };
 
-  // Optional auto-run via ?q= or ?url=
-  const params = new URLSearchParams(window.location.search);
-  const auto = params.get('q')||params.get('url');
-  if(auto){ q.value=auto; form.dispatchEvent(new Event('submit')); }
+  // Auto-run if ?q= or ?url= in URL
+  if(urlParam) perform(urlParam);
+  else if(query) perform(query);
+
+  // Override fallback form submit to JS handler
+  const fallbackForm = document.getElementById('fallbackForm');
+  fallbackForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    perform(fallbackInput.value);
+  });
 })();
 </script>
 
