@@ -2,64 +2,114 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!-- GitHub Pages max-effort CSP -->
+  <meta http-equiv="Content-Security-Policy"
+        content="
+          default-src 'none';
+          script-src 'self';
+          style-src 'self' 'unsafe-inline';
+          img-src 'self';
+          form-action https://www.startpage.com;
+          base-uri 'none';
+          frame-ancestors 'none';
+          object-src 'none';
+        ">
+
+  <!-- Kill referrer everywhere possible -->
+  <meta name="referrer" content="no-referrer">
+
+  <!-- Disable browser features we don't need -->
+  <meta http-equiv="Permissions-Policy"
+        content="
+          accelerometer=(),
+          ambient-light-sensor=(),
+          autoplay=(),
+          battery=(),
+          camera=(),
+          clipboard-read=(),
+          clipboard-write=(),
+          geolocation=(),
+          gyroscope=(),
+          magnetometer=(),
+          microphone=(),
+          midi=(),
+          payment=(),
+          usb=(),
+          xr-spatial-tracking=()
+        ">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KrySearch</title>
 
   <style>
     body {
-      font-family: Inter, Arial, sans-serif;
-      background: #0f0f0f;
-      color: #fff;
+      margin: 0;
+      height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
+      background: #0d0d0d;
+      color: #fff;
+      font-family: system-ui, Inter, Arial, sans-serif;
     }
 
     .box {
-      background: #1a1a1a;
-      padding: 30px;
-      border-radius: 14px;
-      max-width: 450px;
-      box-shadow: 0px 0px 20px rgba(0,0,0,0.45);
+      background: #161616;
+      padding: 32px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 460px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,.65);
     }
 
     h1 {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
+      margin: 0 0 8px;
+      font-size: 1.9rem;
+    }
+
+    p {
+      margin: 0 0 18px;
+      font-size: .95rem;
+      opacity: .6;
     }
 
     input {
       width: 100%;
-      padding: 12px;
-      border-radius: 8px;
+      padding: 14px;
+      border-radius: 10px;
       border: none;
-      margin-bottom: 15px;
+      background: #0b0b0b;
+      color: #fff;
       font-size: 1rem;
+      outline: none;
+      margin-bottom: 14px;
     }
 
     button {
-      padding: 12px 20px;
-      border-radius: 8px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
       border: none;
       background: #4da6ff;
       color: #000;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
     }
 
-    button:hover {
-      background: #3399ff;
+    .status {
+      margin-top: 14px;
+      min-height: 18px;
+      font-size: .85rem;
+      opacity: .6;
     }
 
-    .loading {
-      margin-top: 15px;
-      font-size: 0.9rem;
-      opacity: 0.7;
+    noscript {
+      display: block;
+      margin-top: 18px;
+      font-size: .85rem;
+      color: #ffb84d;
     }
   </style>
 </head>
@@ -67,44 +117,61 @@
 <body>
   <div class="box">
     <h1>KrySearch</h1>
-    <p>Enter text to search securely or a URL to open directly.</p>
+    <p>Static. Local. Private.</p>
 
-    <input type="text" id="searchInput" placeholder="Type your search here or enter a URL..." />
-    <button id="searchBtn">Go</button>
+    <!-- JS path -->
+    <input id="q" type="text" placeholder="Search or URL…" autocomplete="off" autofocus>
+    <button id="go">Go</button>
+    <div class="status" id="status"></div>
 
-    <div class="loading" id="loadingText"></div>
+    <!-- JS-disabled fallback -->
+    <noscript>
+      <form
+        action="https://www.startpage.com/sp/search"
+        method="GET"
+        target="_blank"
+        referrerpolicy="no-referrer"
+      >
+        <input type="text" name="query" placeholder="Search (JS disabled)" required>
+        <button type="submit">Search</button>
+      </form>
+      <div>JavaScript disabled. URL opening unavailable.</div>
+    </noscript>
   </div>
 
   <script>
-    const input = document.getElementById('searchInput');
-    const btn = document.getElementById('searchBtn');
-    const loading = document.getElementById('loadingText');
+    const q = document.getElementById('q');
+    const goBtn = document.getElementById('go');
+    const status = document.getElementById('status');
 
-    function performSearchOrOpen(value) {
-      if (!value) {
-        loading.textContent = 'Please enter a search term or URL.';
-        return;
+    const isURL = v => {
+      try {
+        if (!/^[a-zA-Z][a-zA-Z\\d+\\-.]*:/.test(v)) v = 'https://' + v;
+        new URL(v);
+        return true;
+      } catch {
+        return false;
       }
+    };
 
-      if (value.startsWith('https://')) {
-        loading.textContent = 'Opening URL...';
-        window.open(value, '_blank');
-      } else {
-        loading.textContent = 'Searching securely...';
-        const searchUrl = `https://www.startpage.com/sp/search?query=${encodeURIComponent(value)}`;
-        window.open(searchUrl, '_blank');
-      }
-    }
+    const go = v => {
+      if (!v) return status.textContent = 'Enter something.';
 
-    btn.addEventListener('click', () => performSearchOrOpen(input.value.trim()));
-    input.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearchOrOpen(input.value.trim()); });
+      let target = isURL(v)
+        ? (v.startsWith('http') ? v : 'https://' + v)
+        : `https://www.startpage.com/sp/search?query=${encodeURIComponent(v)}`;
 
-    // Detect query from URL
-    const params = new URLSearchParams(window.location.search);
-    let query = params.get('url') || params.get('q') || params.get('');
-    if (query) {
-      performSearchOrOpen(query.trim());
-    }
+      window.open(target, '_blank', 'noopener,noreferrer');
+      status.textContent = 'Opened.';
+    };
+
+    goBtn.onclick = () => go(q.value.trim());
+    q.onkeydown = e => e.key === 'Enter' && go(q.value.trim());
+
+    /* Optional auto-run via URL params */
+    const p = new URLSearchParams(location.search);
+    const auto = p.get('q') || p.get('url');
+    if (auto) go(auto.trim());
   </script>
 </body>
 </html>
