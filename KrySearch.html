@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
 
-  <!-- GitHub Pages max-effort CSP -->
+  <!-- Max-effort CSP for GitHub Pages -->
   <meta http-equiv="Content-Security-Policy"
         content="
           default-src 'none';
@@ -16,27 +16,18 @@
           object-src 'none';
         ">
 
-  <!-- Kill referrer everywhere possible -->
   <meta name="referrer" content="no-referrer">
 
-  <!-- Disable browser features we don't need -->
   <meta http-equiv="Permissions-Policy"
         content="
           accelerometer=(),
-          ambient-light-sensor=(),
-          autoplay=(),
-          battery=(),
           camera=(),
-          clipboard-read=(),
-          clipboard-write=(),
           geolocation=(),
           gyroscope=(),
           magnetometer=(),
           microphone=(),
-          midi=(),
           payment=(),
-          usb=(),
-          xr-spatial-tracking=()
+          usb=()
         ">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,18 +89,10 @@
       cursor: pointer;
     }
 
-    .status {
+    .hint {
       margin-top: 14px;
-      min-height: 18px;
-      font-size: .85rem;
-      opacity: .6;
-    }
-
-    noscript {
-      display: block;
-      margin-top: 18px;
-      font-size: .85rem;
-      color: #ffb84d;
+      font-size: .8rem;
+      opacity: .5;
     }
   </style>
 </head>
@@ -117,32 +100,37 @@
 <body>
   <div class="box">
     <h1>KrySearch</h1>
-    <p>Static. Local. Private.</p>
+    <p>Private search or direct URL.</p>
 
-    <!-- JS path -->
-    <input id="q" type="text" placeholder="Search or URL…" autocomplete="off" autofocus>
-    <button id="go">Go</button>
-    <div class="status" id="status"></div>
-
-    <!-- JS-disabled fallback -->
-    <noscript>
-      <form
-        action="https://www.startpage.com/sp/search"
-        method="GET"
-        target="_blank"
-        referrerpolicy="no-referrer"
+    <!-- SINGLE SOURCE OF TRUTH -->
+    <form
+      id="searchForm"
+      action="https://www.startpage.com/sp/search"
+      method="GET"
+      target="_blank"
+      referrerpolicy="no-referrer"
+    >
+      <input
+        id="q"
+        name="query"
+        type="text"
+        placeholder="Search or enter a URL…"
+        autocomplete="off"
+        autofocus
+        required
       >
-        <input type="text" name="query" placeholder="Search (JS disabled)" required>
-        <button type="submit">Search</button>
-      </form>
-      <div>JavaScript disabled. URL opening unavailable.</div>
-    </noscript>
+      <button type="submit">Go</button>
+    </form>
+
+    <div class="hint">
+      JavaScript optional · No tracking · No storage
+    </div>
   </div>
 
+  <!-- Progressive enhancement ONLY -->
   <script>
-    const q = document.getElementById('q');
-    const goBtn = document.getElementById('go');
-    const status = document.getElementById('status');
+    const form = document.getElementById('searchForm');
+    const input = document.getElementById('q');
 
     const isURL = v => {
       try {
@@ -154,24 +142,25 @@
       }
     };
 
-    const go = v => {
-      if (!v) return status.textContent = 'Enter something.';
+    form.addEventListener('submit', e => {
+      const value = input.value.trim();
+      if (!value) return;
 
-      let target = isURL(v)
-        ? (v.startsWith('http') ? v : 'https://' + v)
-        : `https://www.startpage.com/sp/search?query=${encodeURIComponent(v)}`;
+      if (isURL(value)) {
+        e.preventDefault();
+        const target = value.startsWith('http') ? value : 'https://' + value;
+        window.open(target, '_blank', 'noopener,noreferrer');
+      }
+      // else: normal form submit → Startpage
+    });
 
-      window.open(target, '_blank', 'noopener,noreferrer');
-      status.textContent = 'Opened.';
-    };
-
-    goBtn.onclick = () => go(q.value.trim());
-    q.onkeydown = e => e.key === 'Enter' && go(q.value.trim());
-
-    /* Optional auto-run via URL params */
+    /* Optional auto-run via ?q= or ?url= */
     const p = new URLSearchParams(location.search);
     const auto = p.get('q') || p.get('url');
-    if (auto) go(auto.trim());
+    if (auto) {
+      input.value = auto;
+      form.requestSubmit();
+    }
   </script>
 </body>
 </html>
