@@ -2,23 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KrySearch</title>
-
-<!-- Referrer & Privacy -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'none';
   script-src 'self';
   style-src 'self' 'unsafe-inline';
-  connect-src https://www.startpage.com;
   img-src 'self';
   font-src 'self';
-  frame-ancestors 'none';
   base-uri 'self';
 ">
-
 <style>
 body { font-family: Inter, Arial, sans-serif; background:#0f0f0f; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; text-align:center;}
 .box { background:#1a1a1a; padding:30px; border-radius:14px; max-width:450px; box-shadow:0 0 20px rgba(0,0,0,0.45);}
@@ -33,8 +27,8 @@ button:hover { background:#3399ff;}
 
 <div class="box">
 <h1>KrySearch</h1>
-<p>Search securely or open a URL directly. Privacy-maximized.</p>
-<input type="text" id="searchInput" placeholder="Type your search or a URL..." />
+<p>Enter a search or a URL. Native apps open when available.</p>
+<input type="text" id="searchInput" placeholder="Search or enter URL..." />
 <button id="searchBtn">Go</button>
 <div class="loading" id="loadingText"></div>
 </div>
@@ -45,40 +39,72 @@ button:hover { background:#3399ff;}
   const btn = document.getElementById('searchBtn');
   const loading = document.getElementById('loadingText');
 
-  // Minimal sanitizer to prevent XSS
-  const sanitize = str => {
-    const d = document.createElement('div');
-    d.textContent = str;
-    return d.textContent;
-  };
+  const sanitize = s => { const d=document.createElement('div'); d.textContent=s; return d.textContent; };
 
-  function performSearchOrOpen(value){
-    if(!value){
-      loading.textContent='Please enter a search term or URL.';
+  // App scheme map
+  const appMap = [
+    { test: /youtube\.com/, app: url => 'youtube://'+url.split('youtube.com/')[1], web: url => url },
+    { test: /open\.spotify\.com/, app: url => 'spotify://'+url.split('open.spotify.com/')[1], web: url => url },
+    { test: /twitter\.com/, app: url => 'twitter://user?screen_name='+url.split('twitter.com/')[1], web: url => url },
+    { test: /instagram\.com/, app: url => 'instagram://'+url.split('instagram.com/')[1], web: url => url },
+    { test: /reddit\.com/, app: url => 'reddit://', web: url => url },
+    { test: /facebook\.com/, app: url => 'fb://facewebmodal/f?href='+url, web: url => url },
+    { test: /messenger\.com/, app: url => 'fb-messenger://', web: url => url },
+    { test: /whatsapp\.com/, app: url => 'whatsapp://send?text='+encodeURIComponent(url), web: url => url },
+    { test: /tiktok\.com/, app: url => 'snssdk1128://'+url.split('tiktok.com/')[1], web: url => url },
+    { test: /telegram\.me/, app: url => 'tg://resolve?domain='+url.split('telegram.me/')[1], web: url => url },
+    { test: /slack\.com/, app: url => 'slack://open', web: url => url },
+    { test: /discord\.com/, app: url => 'discord://', web: url => url },
+    { test: /zoom\.us/, app: url => 'zoomus://'+url.split('zoom.us/')[1], web: url => url },
+    { test: /linkedin\.com/, app: url => 'linkedin://'+url.split('linkedin.com/')[1], web: url => url },
+    { test: /pinterest\.com/, app: url => 'pinterest://'+url.split('pinterest.com/')[1], web: url => url },
+    { test: /skype:\/\//, app: url => url, web: url => url },
+    // Add more here if needed...
+  ];
+
+  function tryNative(url) {
+    for (const svc of appMap) {
+      if(svc.test.test(url)) {
+        const appURL = svc.app(url);
+        // Try open native
+        loading.textContent='Attempting native app...';
+        const now = Date.now();
+        window.location.href = appURL;
+        setTimeout(() => {
+          if(Date.now() - now < 1500) window.location.href = svc.web(url);
+        }, 1200);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function perform(val){
+    if(!val){
+      loading.textContent="Please enter a search term or URL.";
       return;
     }
-    const sanitized = sanitize(value);
+    const s = sanitize(val);
 
-    if(sanitized.startsWith('http://') || sanitized.startsWith('https://')){
-      loading.textContent='Opening URL...';
-      window.open(sanitized,'_blank','noopener,noreferrer');
+    if(/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(s)){
+      if(!tryNative(s)){
+        loading.textContent='Opening in browser...';
+        window.location.href = s;
+      }
     } else {
       loading.textContent='Searching securely...';
-      const searchUrl = `https://www.startpage.com/sp/search?query=${encodeURIComponent(sanitized)}`;
-      window.open(searchUrl,'_blank','noopener,noreferrer');
+      window.location.href = `https://www.startpage.com/sp/search?query=${encodeURIComponent(s)}`;
     }
   }
 
-  // Button + Enter
-  btn.addEventListener('click', ()=>performSearchOrOpen(input.value.trim()));
-  input.addEventListener('keypress', e=>{ if(e.key==='Enter') performSearchOrOpen(input.value.trim()); });
+  btn.addEventListener('click',()=>perform(input.value.trim()));
+  input.addEventListener('keypress',e=>{ if(e.key==='Enter') perform(input.value.trim()); });
 
-  // Auto-run ?q= or ?url=
   const params = new URLSearchParams(window.location.search);
-  const query = params.get('q') || params.get('url');
-  if(query){
-    input.value = sanitize(query.trim());
-    performSearchOrOpen(input.value);
+  const q = params.get('q') || params.get('url');
+  if(q){
+    input.value = sanitize(q.trim());
+    perform(input.value);
   }
 })();
 </script>
