@@ -1,37 +1,48 @@
-/* ===============================
-   ZERO STATE (best‑effort)
-================================ */
-try {
-  localStorage.clear()
-  sessionStorage.clear()
-} catch {}
+'use strict';
 
-try {
-  document.cookie.split(";").forEach(c => {
-    document.cookie = c
-      .replace(/^ +/, "")
-      .replace(/=.*/, "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/")
-  })
-} catch {}
+/* ===============================
+   ZERO STATE (scoped & safe)
+================================ */
+(function () {
+  try {
+    localStorage.clear();
+    sessionStorage.clear();
+  } catch {}
+
+  try {
+    document.cookie.split(";").forEach(function (c) {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/");
+    });
+  } catch {}
+})();
 
 /* ===============================
    PLUGIN REGISTRY & EXECUTOR
 ================================ */
-window.KRY_PLUGINS ||= []
+if (!window.KRY_PLUGINS) {
+  window.KRY_PLUGINS = [];
+}
 
-const KRY_CONTEXT = Object.freeze({
+var KRY_CONTEXT = Object.freeze({
   ua: navigator.userAgent,
   lang: navigator.language,
   platform: navigator.platform,
   url: location.href
-})
+});
 
 function runPlugins() {
-  const plugins = [...window.KRY_PLUGINS]
-  plugins.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-  for (const plugin of plugins) {
+  var plugins = window.KRY_PLUGINS.slice();
+  plugins.sort(function (a, b) {
+    return (a.order || 0) - (b.order || 0);
+  });
+
+  for (var i = 0; i < plugins.length; i++) {
     try {
-      plugin.run?.(KRY_CONTEXT)
+      if (plugins[i] && typeof plugins[i].run === 'function') {
+        plugins[i].run(KRY_CONTEXT);
+      }
     } catch {
       // silent by design
     }
@@ -39,88 +50,91 @@ function runPlugins() {
 }
 
 /* ===============================
-   UI STATUS
+   PRIVACY-FOCUSED ENGINES
 ================================ */
-const status = document.getElementById("status")
-if (status) status.textContent = "Private search mode"
-
-/* ===============================
-   PRIVACY‑FOCUSED ENGINES
-================================ */
-const ENGINES = {
-  startpage: q => `https://www.startpage.com/sp/search?query=${q}`,
-  duckduckgo: q => `https://duckduckgo.com/?q=${q}&kl=wt-wt`,
-  brave: q => `https://search.brave.com/search?q=${q}`,
-  mojeek: q => `https://www.mojeek.com/search?q=${q}`,
-  qwant: q => `https://www.qwant.com/?q=${q}&t=web`
-}
+var ENGINES = {
+  startpage: function (q) {
+    return 'https://www.startpage.com/sp/search?query=' + q;
+  },
+  duckduckgo: function (q) {
+    return 'https://duckduckgo.com/?q=' + q + '&kl=wt-wt';
+  },
+  brave: function (q) {
+    return 'https://search.brave.com/search?q=' + q;
+  },
+  mojeek: function (q) {
+    return 'https://www.mojeek.com/search?q=' + q;
+  },
+  qwant: function (q) {
+    return 'https://www.qwant.com/?q=' + q + '&t=web';
+  }
+};
 
 function pickEngine(name) {
-  return ENGINES[name] || ENGINES.startpage
+  return ENGINES[name] || ENGINES.startpage;
 }
 
 /* ===============================
-   HARDENED NAVIGATION (FINAL)
+   HARDENED NAVIGATION
 ================================ */
 function navigate(url) {
   if (window.__KRY_HARD_NAV__) {
-    window.__KRY_HARD_NAV__(url)
+    window.__KRY_HARD_NAV__(url);
   } else {
-    location.assign(url)
+    location.assign(url);
   }
 }
 
 /* ===============================
    QUERY HANDLER
 ================================ */
-function handleQuery(value, engineName, isUrl = false) {
-  if (!value) return
-  value = value.trim()
+function handleQuery(value, engineName, isUrl) {
+  if (!value) return;
 
-  const engine = pickEngine(engineName)
+  value = value.trim();
 
   // block insecure transport
-  if (/^http:\/\//i.test(value)) return
+  if (/^http:\/\//i.test(value)) return;
 
-  // direct HTTPS navigation
+  var engine = pickEngine(engineName);
+
   if (!isUrl && /^https:\/\//i.test(value)) {
-    navigate(value)
-    return
+    navigate(value);
+    return;
   }
 
-  const q = encodeURIComponent(value)
-  navigate(engine(q))
+  var q = encodeURIComponent(value);
+  navigate(engine(q));
 }
 
 /* ===============================
-   AUTO EXEC (?q= OR ?url=)
+   DOM READY
 ================================ */
-window.addEventListener("DOMContentLoaded", () => {
-  // plugins FIRST so navigation is hardened
-  runPlugins()
+document.addEventListener('DOMContentLoaded', function () {
+  runPlugins();
 
-  const params = new URLSearchParams(location.search)
-  const engine = params.get("engine")
+  var status = document.getElementById('status');
+  if (status) status.textContent = 'Private search mode';
 
-  let q = params.get("q")
-  let url = params.get("url")
+  var params = new URLSearchParams(location.search);
+  var engine = params.get('engine');
+
+  var q = params.get('q');
+  var url = params.get('url');
 
   if (url) {
-    try { url = decodeURIComponent(url) } catch {}
-    handleQuery(url, engine, true)
+    try { url = decodeURIComponent(url); } catch {}
+    handleQuery(url, engine, true);
   } else if (q) {
-    try { q = decodeURIComponent(q) } catch {}
-    handleQuery(q, engine)
+    try { q = decodeURIComponent(q); } catch {}
+    handleQuery(q, engine, false);
   }
-})
 
-/* ===============================
-   UI BINDINGS
-================================ */
-const goBtn = document.getElementById("go")
-if (goBtn) {
-  goBtn.onclick = () => {
-    const value = document.getElementById("q")?.value
-    handleQuery(value)
+  var goBtn = document.getElementById('go');
+  if (goBtn) {
+    goBtn.onclick = function () {
+      var input = document.getElementById('q');
+      if (input) handleQuery(input.value, engine, false);
+    };
   }
-}
+});
